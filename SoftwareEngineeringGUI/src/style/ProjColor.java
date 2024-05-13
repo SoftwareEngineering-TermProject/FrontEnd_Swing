@@ -3,7 +3,7 @@ package style;
 import java.awt.Color;
 
 public class ProjColor {
-	public static final Color customGray = new Color(196, 196, 196); // default background
+	public static final Color customGray = new Color(196, 196, 196);
 	
 	public static final Color customWhiteGray = new Color(215, 215, 215);
 	
