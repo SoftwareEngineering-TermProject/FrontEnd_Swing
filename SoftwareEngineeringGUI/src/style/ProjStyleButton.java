@@ -6,17 +6,12 @@ import java.awt.event.*;
 import java.awt.*;
 
 public class ProjStyleButton extends JButton {
-    private final Color unClickBackground;
-    private final Color clickBackground;
-    private final Color foreground;
 
     int paddingWidth = 15, paddingHeight = 3;
 
     public ProjStyleButton(Color unClickBackground, Color clickBackground, Color foreground, String txt) {
-        this.unClickBackground = unClickBackground;
-        this.clickBackground = clickBackground;
-        this.foreground = foreground;
 
+        setFont(new Font("맑은 고딕", 1, 18));
         setText(txt);
 
         Dimension dimension = getPreferredSize();
@@ -54,7 +49,6 @@ public class ProjStyleButton extends JButton {
         g2.fillRect(0, 0, w, h);
 
         g2.setColor(getForeground());
-        g2.setFont(new Font("맑은 고딕", 1, 18));
 
         FontMetrics fontMetrics = g2.getFontMetrics();
         Rectangle rectangle = fontMetrics.getStringBounds(getText(), g2).getBounds();

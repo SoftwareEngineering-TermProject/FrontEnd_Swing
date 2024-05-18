@@ -94,7 +94,7 @@ public class MainFrame extends JFrame {
 		btn4.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) { // 원래 기능 + new
-                CreateProjectFrame cpf = new CreateProjectFrame();
+            	CreateProjectDialog cpf = new CreateProjectDialog();
 
             }
         });

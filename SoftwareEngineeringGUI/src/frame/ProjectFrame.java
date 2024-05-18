@@ -5,8 +5,6 @@ import style.ProjStyleButton;
 import style.ProjStyleTable;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.Dimension;
 import java.awt.event.*;
 import javax.swing.*;
@@ -18,6 +16,8 @@ public class ProjectFrame extends JFrame{
 		setTitle(name);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
+		
+		JFrame temp = this;
 		
 		JPanel panel1 = new JPanel();
 		panel1.setBackground(ProjColor.customGray);
@@ -93,6 +93,7 @@ public class ProjectFrame extends JFrame{
         		if (row == 0) {
         			System.out.println("Issue description"); // issue description tap 생성
         		}
+        		new IssuePage();
         	}
         });
         
@@ -110,4 +111,5 @@ public class ProjectFrame extends JFrame{
 			}
 		});
 	}
+	
 }

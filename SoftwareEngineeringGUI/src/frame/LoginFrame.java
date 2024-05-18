@@ -76,9 +76,8 @@ public class LoginFrame extends JFrame{
 		btn2.setPreferredSize(new Dimension(100, 30));
 		
 		ProjStyleButton btn3 = new ProjStyleButton(ProjColor.customGray, ProjColor.customGray, Color.BLACK, "Forgot your ID/password?"); // 클릭/릴리즈 시 텍스트 변하게
-		btn3.setFont(new Font(null, Font.PLAIN, 5)); // 지금 안됨. 오버라이드 해야할듯?
 		panel1.add(btn3);
-		btn3.setBounds(20, 208, 228, 23);
+		btn3.setBounds(20, 220, 228, 23);
 		btn3.setPreferredSize(new Dimension(228, 23));
 		
 		btn3.addMouseListener(new MouseAdapter() {

@@ -5,6 +5,8 @@ import java.awt.Color;
 public class ProjColor {
 	public static final Color customGray = new Color(196, 196, 196);
 	
+	public static final Color clickedCustomGray = new Color(168, 168, 168);
+	
 	public static final Color customWhiteGray = new Color(215, 215, 215);
 	
 	public static final Color customDarkGray = new Color(157, 157, 157);
@@ -26,5 +28,7 @@ public class ProjColor {
 	public static final Color selectedTableCustomGray = new Color(51, 103, 209);
 	
 	public static final Color selectedTableAnotherCellGray = new Color(26, 67, 151);
+	
+	public static final Color customStaleSkyBlue = new Color(163, 184, 204);
 	
 }
