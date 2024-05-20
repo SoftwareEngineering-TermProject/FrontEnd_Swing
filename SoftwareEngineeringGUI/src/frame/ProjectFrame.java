@@ -33,6 +33,13 @@ public class ProjectFrame extends JFrame{
 		btn1.setBounds(50, 100, 220, 50);
 		btn1.setPreferredSize(new Dimension(220, 50));
 		
+		btn1.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				new NewIssuePage();
+			}
+		});
+		
 		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "+ add member");
 		panel1.add(btn2);
 		btn2.setBounds(285, 100, 220, 50);

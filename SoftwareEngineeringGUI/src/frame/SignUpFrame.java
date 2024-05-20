@@ -92,7 +92,7 @@ class SignUpFrame extends JFrame {
         new SwingWorker<String, Void>() {
             @Override
             protected String doInBackground() throws Exception {
-                return RestClient.sendPostRequest("http://localhost:8080/users/sign_up", jsonInputString);
+                return RestClient.sendPostRequest("http://localhost:8080/users/", jsonInputString);
             }
             @Override
             protected void done() {
@@ -105,7 +105,8 @@ class SignUpFrame extends JFrame {
                     String code = jsonResponse.getString("code");
                     
                     if (isSuccess && "USER_1000".equals(code)) {
-                    	                 	
+                    	//성공시 DB에 저장하는 코드 삽입예정
+                    	
                     } else {
                         // 실패 시 오류 메시지 표시
                         String message = jsonResponse.getString("message");
