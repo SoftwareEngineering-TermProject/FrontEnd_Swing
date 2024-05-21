@@ -88,12 +88,21 @@ public class MainFrame extends JFrame {
 	}
 	
 	public void repaintButtonPanel() {
-		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, (String)projectList.get(numBtn)[0]);
+		String title = (String)projectList.get(numBtn)[0];
+		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
 		btnArray.add(tempbtn);
 		btnArray.get(numBtn).setBounds(31, 35 + 110 * numBtn, 997, 75);
 		btnPanel.add(btnArray.get(numBtn));
 		btnArray.get(numBtn).setPreferredSize(new Dimension(997, 75));
 		btnPanel.setPreferredSize(new Dimension(1000, 120 + 110 * numBtn));
+		
+		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				new ProjectFrame(title);
+			}
+		});
+		
 		btnPanel.revalidate();
 		numBtn++;
 		
