@@ -62,7 +62,18 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		btn1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				tempfunction();
+				String title = tf1.getText().trim();
+				String description = ta1.getText().trim();
+				
+				if(title.equals("")) {
+					JOptionPane.showMessageDialog(CreateProjectDialog.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else {
+					parentFrame.addProjectList(title, description);
+					parentFrame.repaintButtonPanel();
+					setVisible(false);
+					dispose();
+				}
 			}
 		});
 		
