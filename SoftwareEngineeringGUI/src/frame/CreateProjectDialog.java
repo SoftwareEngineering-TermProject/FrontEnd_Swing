@@ -10,7 +10,10 @@ import java.awt.event.*;
 
 public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 	
-	public CreateProjectDialog() {
+	private MainFrame parentFrame;
+	
+	public CreateProjectDialog(MainFrame parentFrame) {
+		this.parentFrame = parentFrame;
 		setTitle("New Project");
 		setSize(560, 480);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -56,6 +59,24 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		btn1.setBounds(108, 380, 111, 56);
 		btn1.setPreferredSize(new Dimension(111, 56));
 		
+		btn1.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				String title = tf1.getText().trim();
+				String description = ta1.getText().trim();
+				
+				if(title.equals("")) {
+					JOptionPane.showMessageDialog(CreateProjectDialog.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+				else {
+					parentFrame.addProjectList(title, description);
+					parentFrame.repaintButtonPanel();
+					setVisible(false);
+					dispose();
+				}
+			}
+		});
+		
 		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customWhiteRed, ProjColor.clickedCustomWhiteRed, Color.BLACK, "Cancel");
 		panel1.add(btn2);
 		btn2.setBounds(325, 380, 111, 56);
@@ -91,5 +112,10 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		setVisible(true);
 		
 		
+	}
+	
+	public void tempfunction() {
+		parentFrame.setVisible(false);
+		parentFrame.dispose();
 	}
 }
