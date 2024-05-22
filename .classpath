@@ -6,7 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/user/eclipse-workspace/SoftwareEngineeringGUI2/libs/json-20210307.jar"/>
-	<classpathentry kind="lib" path="C:/Users/user/eclipse-workspace/SoftwareEngineeringGUI2/libs/json-20240303.jar"/>
+	<classpathentry kind="lib" path="C:/Users/user/eclipse-workspace/SwEngineering/libs/json-20210307.jar"/>
+	<classpathentry kind="lib" path="C:/Users/user/eclipse-workspace/SwEngineering/libs/json-20240303.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

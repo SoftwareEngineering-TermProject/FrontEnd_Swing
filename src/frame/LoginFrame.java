@@ -16,7 +16,8 @@ import org.json.JSONObject;
 public class LoginFrame extends JFrame{
 	private JTextField tf1;
     private JPasswordField pf1;
-  
+    private static long userId; // userId를 저장하는 필드 추가
+    
 	Color userGray = new Color(196, 196, 196);
 	
 	Color userDarkGray = new Color(157, 157, 157);
@@ -29,7 +30,8 @@ public class LoginFrame extends JFrame{
 	Color clickedUserWhiteRed = new Color(200, 75, 75);
 	
 	Color userWhiteGray = new Color(215, 215, 215);
-
+	
+ 
 	public LoginFrame() {
 		setTitle("Log in");
 		setSize(600, 400);
@@ -132,9 +134,9 @@ public class LoginFrame extends JFrame{
                 String id = tf1.getText();
                 String password = new String(pf1.getPassword());
                 String userName = tf1.getText();  // id 필드를 userName으로 사용
-                String name = "FixedName";  // 고정 값 사용
-                String userRole = "ADMIN";  // 고정 값 사용
-                String jsonInputString = String.format("{\"id\":\"%s\", \"userName\":\"%s\", \"password\":\"%s\", \"name\":\"%s\", \"userRole\":\"%s\"}", id, userName, password, name, userRole);
+                //String name = "FixedName";  // 고정 값 사용
+                //String userRole = "ADMIN";  // 고정 값 사용
+                String jsonInputString = String.format("{\"id\":\"%s\", \"userName\":\"%s\", \"password\":\"%s\"}", id, userName, password);
                 System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
                 return RestClient.sendPostRequest("http://localhost:8080/users/sign_in", jsonInputString); // 실제 서버 URL 사용
             }
@@ -149,13 +151,14 @@ public class LoginFrame extends JFrame{
                     JSONObject jsonResponse = new JSONObject(result);
                     boolean isSuccess = jsonResponse.getBoolean("isSuccess");
                     String code = jsonResponse.getString("code");
+                    userId = jsonResponse.getJSONObject("result").getLong("userId"); // userId 저장
                     
                     //System.out.println("isSuccess: " + isSuccess);
                     //System.out.println("code: " + code); 
                     //응답 결과 처리
                     if (isSuccess && "USER_1000".equals(code)) {
                         // 성공 시 다음 프레임으로 이동
-                        new MainFrame();
+                        new MainFrame(userId);
                         setVisible(false);
                         dispose();
                     } else {

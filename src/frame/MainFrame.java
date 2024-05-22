@@ -21,8 +21,12 @@ public class MainFrame extends JFrame {
 	Color userDarkSkyBlue = new Color(78, 157, 157);
 	Color clickedUserDarySkyBlue = new Color(70, 140, 140);
 	
+	
 	//생성자
-	public MainFrame() {
+	public MainFrame(long userId) {
+		
+
+		
 		setTitle("Main Frame");
 		setSize(1150,820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -98,7 +102,7 @@ public class MainFrame extends JFrame {
 		btn4.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) { // 원래 기능 + new
-                new CreateProjectFrame();
+                new CreateProjectFrame(userId);
             }
         });
 		
