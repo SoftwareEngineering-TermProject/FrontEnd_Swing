@@ -81,9 +81,7 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		panel1.add(btn2);
 		btn2.setBounds(325, 380, 111, 56);
 		btn2.setPreferredSize(new Dimension(111, 56));
-		
-		System.out.println("33");
-		
+
 		btn2.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -114,8 +112,4 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		
 	}
 	
-	public void tempfunction() {
-		parentFrame.setVisible(false);
-		parentFrame.dispose();
-	}
 }

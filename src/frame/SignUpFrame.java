@@ -1,5 +1,6 @@
 package frame;
 
+import style.ProjColor;
 import style.ProjStyleButton;
 import util.RestClient;
 
@@ -18,10 +19,6 @@ class SignUpFrame extends JFrame {
     private JPasswordField pfPassword;
     private JComboBox<String> cbUserRole;
 
-    Color userGray = new Color(196, 196, 196);
-    Color userDarkGray = new Color(157, 157, 157);
-    Color clickedUserDarkGray = new Color(120, 120, 120);
-    
     public SignUpFrame() {
         setTitle("Sign Up");
         setSize(400, 300);
@@ -30,7 +27,7 @@ class SignUpFrame extends JFrame {
 
         JPanel panel = new JPanel();
         panel.setLayout(null);
-        panel.setBackground(userGray);
+        panel.setBackground(ProjColor.customGray);
 
         JLabel lblName = new JLabel("Name:");
         lblName.setBounds(50, 50, 80, 25);
@@ -55,7 +52,8 @@ class SignUpFrame extends JFrame {
         pfPassword = new JPasswordField();
         pfPassword.setBounds(150, 110, 165, 25);
         panel.add(pfPassword);
-
+        
+        
         JLabel lblUserRole = new JLabel("User Role:");
         lblUserRole.setBounds(50, 140, 80, 25);
         panel.add(lblUserRole);
@@ -64,7 +62,7 @@ class SignUpFrame extends JFrame {
         cbUserRole.setBounds(150, 140, 165, 25);
         panel.add(cbUserRole);
 
-        ProjStyleButton btnSubmit = new ProjStyleButton(userDarkGray, clickedUserDarkGray, Color.BLACK, "Submit");
+        ProjStyleButton btnSubmit = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "Submit");
         btnSubmit.setBounds(180, 180, 100, 30);
         btnSubmit.setPreferredSize(new Dimension(100, 30));
         btnSubmit.addMouseListener(new MouseAdapter() {

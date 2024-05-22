@@ -13,8 +13,8 @@ import javax.swing.table.DefaultTableModel;
 public class ProjectFrame extends JFrame{
 
 	
-	public ProjectFrame(String name) {
-		setTitle(name);
+	public ProjectFrame(long projId, String title, MainFrame parentFrame) {
+		setTitle(title);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
 		
@@ -22,7 +22,7 @@ public class ProjectFrame extends JFrame{
 		panel1.setBackground(ProjColor.customGray);
 		panel1.setLayout(null);
 		
-		JLabel lbl1 = new JLabel(name);
+		JLabel lbl1 = new JLabel(title);
 		lbl1.setFont(new Font(null, Font.PLAIN, 50));
 		panel1.add(lbl1);
 		lbl1.setBounds(20, 1, 800, 80);
@@ -111,7 +111,7 @@ public class ProjectFrame extends JFrame{
 		
 		addWindowListener(new WindowAdapter() { // 1. 화면 전환에 new가 맞는가 2. x가 아니라 뒤로가기 버튼을 새로 만들어야 하나
 			public void windowClosing(WindowEvent e) {
-				new MainFrame();
+				parentFrame.setVisible(true);
 				setVisible(false);
 				dispose(); // 현재 프레임만 없애기
 			}

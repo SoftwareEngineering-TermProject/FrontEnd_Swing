@@ -21,8 +21,19 @@ public class MainFrame extends JFrame {
 	private JScrollPane scr;
 	private int numBtn = 0;
 	
+	private long userId; // 임시, 나중에는 로그인하면 특정 static 변수에 저장되어서 통신 요청에 쓰여야 함. 지금은 임시로, 모든 프로젝트 접근 등 가능.
+	private ArrayList<Long> accessibleId; // 이것도 임시.
+	private long projectId; // 이것도 임시. 
+	
 	//생성자
 	public MainFrame() {
+		
+		//임시
+		accessibleId = new ArrayList<>();
+		userId = 20201708;
+		projectId = 12345678;
+		accessibleId.add(userId);
+		
 		setTitle("Main Frame");
 		setSize(1150,820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -67,7 +78,7 @@ public class MainFrame extends JFrame {
 		btn4.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) { // 원래 기능 + new
-            	parent();
+            	newCreateProject();
             }
         });
 		
@@ -77,12 +88,9 @@ public class MainFrame extends JFrame {
 		setVisible(true);
 	}
 	
-	public void parent() {
-		new CreateProjectDialog(this);
-	}
 	
 	public void addProjectList(String title, String description) {
-		Object[] array = {title, description};
+		Object[] array = {title, description, projectId};
 		projectList.add(array);
 		
 	}
@@ -90,6 +98,7 @@ public class MainFrame extends JFrame {
 	public void repaintButtonPanel() {
 		String title = (String)projectList.get(numBtn)[0];
 		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
+		tempbtn.setActionCommand(String.valueOf(numBtn));
 		btnArray.add(tempbtn);
 		btnArray.get(numBtn).setBounds(31, 35 + 110 * numBtn, 997, 75);
 		btnPanel.add(btnArray.get(numBtn));
@@ -99,7 +108,9 @@ public class MainFrame extends JFrame {
 		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				new ProjectFrame(title);
+				JButton sourceButton = (JButton) e.getSource();
+				long projId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[2];
+				accessProject(projId, title);
 			}
 		});
 		
@@ -108,6 +119,23 @@ public class MainFrame extends JFrame {
 		
 		scr.revalidate();
         scr.repaint();
+	}
+	
+	public void newCreateProject() {
+		new CreateProjectDialog(this);
+	}
+	
+	public void accessProject(long projId, String title) {
+		//new ProjectFrame(title, this);
+		
+		//통신 요청으로 프로젝트 접속할때 userId 확인해서 접근 권한 있는지 체크. 일단은 임시로 느낌만 만듬.
+		if(!accessibleId.contains(userId)) {
+			JOptionPane.showMessageDialog(MainFrame.this, "NOT accessible", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else {
+			new ProjectFrame(projId, title, this);
+			setVisible(false);
+		}
 	}
 }
 

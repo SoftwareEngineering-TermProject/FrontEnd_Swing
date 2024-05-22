@@ -162,6 +162,7 @@ public class LoginFrame extends JFrame{
 		
 		//new LoginFrame();
 		//new ProjectFrame("Test");
-		SwingUtilities.invokeLater(LoginFrame::new);
+		//SwingUtilities.invokeLater(LoginFrame::new);
+		new MainFrame();
 	}
 }
