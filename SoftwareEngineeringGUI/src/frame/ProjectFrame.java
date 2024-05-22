@@ -12,12 +12,11 @@ import javax.swing.table.DefaultTableModel;
 
 public class ProjectFrame extends JFrame{
 
+	
 	public ProjectFrame(String name) {
 		setTitle(name);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
-		
-		JFrame temp = this;
 		
 		JPanel panel1 = new JPanel();
 		panel1.setBackground(ProjColor.customGray);
