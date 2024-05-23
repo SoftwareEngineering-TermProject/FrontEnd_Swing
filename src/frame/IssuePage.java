@@ -20,6 +20,11 @@ import javax.swing.*;
 
 public class IssuePage extends JDialog {
 	
+	String[] tester; // 요청 받아와서 tester 배열 생성.
+	String[] dev; // 요청 받아와서 dev 배열 생성
+	String[] priority = {"None", "critical", "major", "high", "medium", "low", "trivial"};
+	String[] status = {"new", "assigned", "fixed", "investigating", "closed"};
+	
 	public IssuePage () {
 		setSize(600,700);
 		setLocationRelativeTo(null);

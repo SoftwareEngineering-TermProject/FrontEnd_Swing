@@ -17,11 +17,13 @@ public class ProjectFrame extends JFrame{
 	private DefaultTableModel model;
 	private ArrayList<Object[]> issueList;
 	private int issueNum;
+	private ArrayList<Object[]> projectMember;
 	
 	public ProjectFrame(long projId, String title, MainFrame parentFrame) {
 		
 		issueList = new ArrayList<>();
 		issueNum = 0;
+		projectMember = new ArrayList<>();
 		
 		setTitle(title);
 		setSize(1150, 820);
@@ -52,6 +54,13 @@ public class ProjectFrame extends JFrame{
 		panel1.add(btn2);
 		btn2.setBounds(285, 100, 220, 50);
 		btn2.setPreferredSize(new Dimension(220, 50));
+		
+		btn2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				createAddMemberPage();
+			}
+		});
 		
 		JTextField tf1 = new JTextField();
 		tf1.setBackground(ProjColor.customWhiteGray);
@@ -140,6 +149,15 @@ public class ProjectFrame extends JFrame{
 	
 	public void callAddIssue() {
 		new NewIssuePage(this);
+	}
+	
+	public void addProjectMember(String userName, String userRole) { // userName(우리가 생각하는 id)
+		Object[] array = {userName, userRole};
+		projectMember.add(array);
+	}
+	
+	public void createAddMemberPage() {
+		new addMemberPage(this);
 	}
 	
 }

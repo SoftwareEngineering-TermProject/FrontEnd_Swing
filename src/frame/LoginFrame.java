@@ -162,5 +162,7 @@ public class LoginFrame extends JFrame{
 		
 		//SwingUtilities.invokeLater(LoginFrame::new);
 		new MainFrame();
+		// addMemberPage();
+		
 	}
 }
