@@ -31,4 +31,15 @@ public class ProjColor {
 	
 	public static final Color customStaleSkyBlue = new Color(163, 184, 204);
 	
+	public static final Color customLightGray = new Color(240, 240, 240);
+	
+	public static final Color customWindowDarkGray = new Color(60, 60, 60);
+	
+	public static final Color customWindowSearchBoxDarkGray = new Color(40, 40, 40);
+	
+	public static final Color customWindowSearchBoxTextGray = new Color(199, 199, 199);
+	
+	public static final Color customWindowScrollBarGray = new Color(211, 209, 203);
+	
+	public static final Color customWindowScrollPaneGray = new Color(237, 236, 233);
 }
