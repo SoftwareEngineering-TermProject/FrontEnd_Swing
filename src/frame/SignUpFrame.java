@@ -35,6 +35,8 @@ class SignUpFrame extends JFrame {
 
         tfName = new JTextField();
         tfName.setBounds(150, 50, 165, 25);
+        tfName.setBackground(ProjColor.customDarkGray);
+        tfName.setBorder(null);
         panel.add(tfName);
 
         JLabel lblID = new JLabel("ID:");
@@ -43,6 +45,8 @@ class SignUpFrame extends JFrame {
 
         tfID = new JTextField();
         tfID.setBounds(150, 80, 165, 25);
+        tfID.setBackground(ProjColor.customDarkGray);
+        tfID.setBorder(null);
         panel.add(tfID);
 
         JLabel lblPassword = new JLabel("Password:");
@@ -51,9 +55,11 @@ class SignUpFrame extends JFrame {
 
         pfPassword = new JPasswordField();
         pfPassword.setBounds(150, 110, 165, 25);
+        pfPassword.setBackground(ProjColor.customDarkGray);
+        pfPassword.setBorder(null);
         panel.add(pfPassword);
         
-        
+        //제거
         JLabel lblUserRole = new JLabel("User Role:");
         lblUserRole.setBounds(50, 140, 80, 25);
         panel.add(lblUserRole);
@@ -112,11 +118,13 @@ class SignUpFrame extends JFrame {
                     }
                     // 서버 응답 처리 (필요에 따라 추가)
                     JOptionPane.showMessageDialog(SignUpFrame.this, "Sign Up Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    setVisible(false);
+                    dispose();
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(SignUpFrame.this, "Sign Up Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        }.execute();				
+        }.execute();
 	}
 }	

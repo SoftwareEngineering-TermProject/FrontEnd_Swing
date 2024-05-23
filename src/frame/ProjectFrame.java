@@ -7,13 +7,22 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class ProjectFrame extends JFrame{
-
+	
+	private DefaultTableModel model;
+	private ArrayList<Object[]> issueList;
+	private int issueNum;
 	
 	public ProjectFrame(long projId, String title, MainFrame parentFrame) {
+		
+		issueList = new ArrayList<>();
+		issueNum = 0;
+		
 		setTitle(title);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -35,7 +44,7 @@ public class ProjectFrame extends JFrame{
 		btn1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				new NewIssuePage();
+				callAddIssue();
 			}
 		});
 		
@@ -85,10 +94,11 @@ public class ProjectFrame extends JFrame{
         table.setColumnAlignment(7, JLabel.CENTER);
         table.setCellAlignment(7, JLabel.CENTER);
 		
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		model = (DefaultTableModel) table.getModel();
         
 		for (int i = 1; i <= 20; i++) { // 데이터 받아와서 동적으로 추가
-            model.addRow(new Object[]{i, "draw picture", "tester1", "dev1", "dev1", "major", "closed", "24-04-30"});
+            addIssue("draw picture", "tester1", "dev1", "dev1", "major", "closed", "24-04-30");
+            addModel();
         }
         
         table.addMouseListener(new MouseAdapter() { // row가 동적으로 생성됨에 따라 이놈도 동적으로 생성되어야 하는데... 동적으로 생성될때마다 override를 해주자.
@@ -116,6 +126,20 @@ public class ProjectFrame extends JFrame{
 				dispose(); // 현재 프레임만 없애기
 			}
 		});
+	}
+	
+	public void addIssue(String title, String reporter, String fixer, String assignee, String priority, String status, String date) {
+		Object[] array = {issueNum+1, title, reporter, fixer, assignee, priority, status, date};
+		issueList.add(array);
+	}
+	
+	public void addModel() {
+		model.addRow(issueList.get(issueNum));
+		issueNum++;
+	}
+	
+	public void callAddIssue() {
+		new NewIssuePage(this);
 	}
 	
 }

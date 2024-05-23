@@ -1,5 +1,7 @@
 package frame;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -16,8 +18,18 @@ import style.ProjStyleScrollBar;
 
 public class NewIssuePage extends JDialog {
 	
+	private ProjectFrame parentFrame;
+	private String userRole; // 임시.
+	private JTextField tf1;
+	private JTextArea ta1;
 	
-	public NewIssuePage() {
+	public NewIssuePage(ProjectFrame parentFrame) {
+		
+		this.parentFrame= parentFrame;
+		
+		//임시
+		userRole = "TESTER";
+		
 		setSize(560, 480);
 		setLocationRelativeTo(null); // 화면 중앙 위치
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -45,14 +57,14 @@ public class NewIssuePage extends JDialog {
 		panel1.add(lbl3);
 		lbl3.setBounds(35, 158, 400, 80);
 		
-		JTextField tf1 = new JTextField();
+		tf1 = new JTextField();
 		tf1.setBackground(ProjColor.customDarkGray);
 		tf1.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 		tf1.setBorder(null);
 		panel1.add(tf1);
 		tf1.setBounds(37, 116, 465, 56);
 		
-		JTextArea ta1 = new JTextArea();
+		ta1 = new JTextArea();
 		ta1.setBackground(ProjColor.customDarkGray);
 		ta1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 		panel1.add(ta1);
@@ -66,8 +78,7 @@ public class NewIssuePage extends JDialog {
 		btn1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				setVisible(false);
-				dispose();
+				addIssueRow();
 			}
 		});
 		
@@ -104,6 +115,23 @@ public class NewIssuePage extends JDialog {
 		setVisible(true);
 		
 		
+	}
+	
+	public void addIssueRow() {
+		String title = tf1.getText().trim();
+		LocalDate now = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd");
+		String formatedNow = now.format(formatter);
+		
+		if (title.equals("")) {
+			JOptionPane.showMessageDialog(NewIssuePage.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else {
+			parentFrame.addIssue(title, userRole, "None", "None", "None", "New", formatedNow);
+			parentFrame.addModel();
+			setVisible(false);
+			dispose();
+		}
 	}
 	
 }
