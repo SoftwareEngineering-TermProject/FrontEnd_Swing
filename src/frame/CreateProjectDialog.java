@@ -2,15 +2,28 @@ package frame;
 
 import style.ProjColor;
 import style.ProjStyleButton;
+import util.RestClient;
+
 import javax.swing.*;
+
+import org.json.JSONObject;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.concurrent.ExecutionException;
 
 public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 	
 	private MainFrame parentFrame;
+	private JTextField tf1;
+	private JTextArea ta1;
 	
 	public CreateProjectDialog(MainFrame parentFrame) {
 		this.parentFrame = parentFrame;
@@ -41,14 +54,14 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		panel1.add(lbl3);
 		lbl3.setBounds(35, 158, 400, 80);
 		
-		JTextField tf1 = new JTextField();
+		tf1 = new JTextField();
 		tf1.setBackground(ProjColor.customDarkGray);
 		tf1.setFont(new Font("맑은 고딕", Font.BOLD, 20));
 		tf1.setBorder(null);
 		panel1.add(tf1);
 		tf1.setBounds(37, 116, 465, 56);
 		
-		JTextArea ta1 = new JTextArea();
+		ta1 = new JTextArea();
 		ta1.setBackground(ProjColor.customDarkGray);
 		ta1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 		panel1.add(ta1);
@@ -69,10 +82,7 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 					JOptionPane.showMessageDialog(CreateProjectDialog.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else {
-					parentFrame.addProjectList(title, description);
-					parentFrame.repaintButtonPanel();
-					setVisible(false);
-					dispose();
+					AddProject();
 				}
 			}
 		});
@@ -110,6 +120,84 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 		setVisible(true);
 		
 		
+	}
+	
+	public void AddProject() {
+		String title = tf1.getText();
+        String description = ta1.getText();
+        long userId = 12;
+        
+        String jsonInputString = String.format("{\"title\":\"%s\", \"description\":\"%s\"}", title, description);
+        System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
+
+        new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+            	// 파라미터를 URL 인코딩
+                String encodedUserId = URLEncoder.encode(userId + "", "UTF-8");
+
+                // URL에 파라미터 추가
+                String urlString = "http://localhost:8080/projects/?userId=" + encodedUserId;
+                
+                /*
+                URL url = new URL(urlString + "/?userId=" +encodedUserId);
+
+                // 연결 설정
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.setRequestProperty("Accept", "application/json");
+
+                // 응답 읽기
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                // 응답 반환
+                return response.toString();
+                */
+                return RestClient.sendPostRequest(urlString, jsonInputString);
+            }
+            @Override
+            protected void done() {
+                try {
+                    String response = get();
+                    System.out.println("Response from server: " + response);
+                    // JSON 응답 파싱
+                    JSONObject jsonResponse = new JSONObject(response);
+                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                    String code = jsonResponse.getString("code");
+                    
+                    if (isSuccess && "PROJECT_2000".equals(code)) {
+                    	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                    	long projectId = resultObject.getLong("projectId");
+                        String title = resultObject.getString("title");
+                        String description = resultObject.getString("description");
+                        
+                        Object[] array = {projectId, title, description};
+
+                        parentFrame.addProjectArrayList(array);
+                        
+                        parentFrame.repaintButtonPanel();
+                    	
+                    	JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        setVisible(false);
+                        dispose();  	
+                    } else {
+                        // 실패 시 오류 메시지 표시
+                        String message = jsonResponse.getString("message");
+                        JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
 	}
 	
 }
