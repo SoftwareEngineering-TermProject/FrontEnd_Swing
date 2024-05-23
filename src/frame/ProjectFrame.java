@@ -7,14 +7,25 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.*;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class ProjectFrame extends JFrame{
-
 	
-	public ProjectFrame(String name) {
-		setTitle(name);
+	private DefaultTableModel model;
+	private ArrayList<Object[]> issueList;
+	private int issueNum;
+	private ArrayList<Object[]> projectMember;
+	
+	public ProjectFrame(long projId, String title, MainFrame parentFrame) {
+		
+		issueList = new ArrayList<>();
+		issueNum = 0;
+		projectMember = new ArrayList<>();
+		
+		setTitle(title);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
 		
@@ -22,7 +33,7 @@ public class ProjectFrame extends JFrame{
 		panel1.setBackground(ProjColor.customGray);
 		panel1.setLayout(null);
 		
-		JLabel lbl1 = new JLabel(name);
+		JLabel lbl1 = new JLabel(title);
 		lbl1.setFont(new Font(null, Font.PLAIN, 50));
 		panel1.add(lbl1);
 		lbl1.setBounds(20, 1, 800, 80);
@@ -35,7 +46,7 @@ public class ProjectFrame extends JFrame{
 		btn1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				new NewIssuePage();
+				callAddIssue();
 			}
 		});
 		
@@ -43,6 +54,13 @@ public class ProjectFrame extends JFrame{
 		panel1.add(btn2);
 		btn2.setBounds(285, 100, 220, 50);
 		btn2.setPreferredSize(new Dimension(220, 50));
+		
+		btn2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				createAddMemberPage();
+			}
+		});
 		
 		JTextField tf1 = new JTextField();
 		tf1.setBackground(ProjColor.customWhiteGray);
@@ -85,10 +103,11 @@ public class ProjectFrame extends JFrame{
         table.setColumnAlignment(7, JLabel.CENTER);
         table.setCellAlignment(7, JLabel.CENTER);
 		
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		model = (DefaultTableModel) table.getModel();
         
 		for (int i = 1; i <= 20; i++) { // 데이터 받아와서 동적으로 추가
-            model.addRow(new Object[]{i, "draw picture", "tester1", "dev1", "dev1", "major", "closed", "24-04-30"});
+            addIssue("draw picture", "tester1", "dev1", "dev1", "major", "closed", "24-04-30");
+            addModel();
         }
         
         table.addMouseListener(new MouseAdapter() { // row가 동적으로 생성됨에 따라 이놈도 동적으로 생성되어야 하는데... 동적으로 생성될때마다 override를 해주자.
@@ -111,11 +130,34 @@ public class ProjectFrame extends JFrame{
 		
 		addWindowListener(new WindowAdapter() { // 1. 화면 전환에 new가 맞는가 2. x가 아니라 뒤로가기 버튼을 새로 만들어야 하나
 			public void windowClosing(WindowEvent e) {
-				new MainFrame();
+				parentFrame.setVisible(true);
 				setVisible(false);
 				dispose(); // 현재 프레임만 없애기
 			}
 		});
+	}
+	
+	public void addIssue(String title, String reporter, String fixer, String assignee, String priority, String status, String date) {
+		Object[] array = {issueNum+1, title, reporter, fixer, assignee, priority, status, date};
+		issueList.add(array);
+	}
+	
+	public void addModel() {
+		model.addRow(issueList.get(issueNum));
+		issueNum++;
+	}
+	
+	public void callAddIssue() {
+		new NewIssuePage(this);
+	}
+	
+	public void addProjectMember(String userName, String userRole) { // userName(우리가 생각하는 id)
+		Object[] array = {userName, userRole};
+		projectMember.add(array);
+	}
+	
+	public void createAddMemberPage() {
+		new addMemberPage(this);
 	}
 	
 }

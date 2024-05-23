@@ -160,8 +160,9 @@ public class LoginFrame extends JFrame{
 	
 	public static void main(String[] args) {
 		
-		//new LoginFrame();
-		//new ProjectFrame("Test");
-		SwingUtilities.invokeLater(LoginFrame::new);
+		//SwingUtilities.invokeLater(LoginFrame::new);
+		new MainFrame();
+		// addMemberPage();
+		
 	}
 }
