@@ -3,15 +3,26 @@ package frame;
 import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleScrollBar;
+import util.RestClient;
 
 import javax.swing.*;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 
 public class MainFrame extends JFrame {
@@ -23,15 +34,17 @@ public class MainFrame extends JFrame {
 	
 	private long userId; // 임시, 나중에는 로그인하면 특정 static 변수에 저장되어서 통신 요청에 쓰여야 함. 지금은 임시로, 모든 프로젝트 접근 등 가능.
 	private ArrayList<Long> accessibleId; // 이것도 임시.
-	private long projectId; // 이것도 임시. 
+	//private long projectId; // 이것도 임시. 
 	
 	//생성자
 	public MainFrame() {
 		
+		readProjectList(""); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
+		
 		//임시
 		accessibleId = new ArrayList<>();
-		userId = 20201708;
-		projectId = 12345678;
+		userId = 1;
+		//projectId = 12345678;
 		accessibleId.add(userId);
 		
 		setTitle("Main Frame");
@@ -88,15 +101,95 @@ public class MainFrame extends JFrame {
 		setVisible(true);
 	}
 	
+	public void readProjectList(String userName) {
+
+        new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+            	// 파라미터를 URL 인코딩
+                String encodedUsername = URLEncoder.encode(userName, "UTF-8");
+
+                // URL에 파라미터 추가
+                String urlString = "http://localhost:8080/projects";
+                URL url = new URL(urlString + encodedUsername); // 
+                
+                // 연결 설정
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.setRequestProperty("Accept", "application/json");
+
+                // 응답 읽기
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                // 응답 반환
+                return response.toString();
+            }
+            @Override
+            protected void done() {
+                try {
+                    String response = get();
+                    System.out.println("Response from project server: " + response);
+                    
+                    JSONObject jsonResponse = new JSONObject(response);
+                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                    String code = jsonResponse.getString("code");
+                    
+                    if (isSuccess && "PROJECT_2000".equals(code)) {
+                    	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                        JSONArray projectsArray = resultObject.getJSONArray("projects");
+                        
+                        Object[] objects = new Object[projectsArray.length()];
+                        for (int i = 0; i < projectsArray.length(); i++) {
+                            JSONObject projectObject = projectsArray.getJSONObject(i);
+                            long projectId = projectObject.getLong("projectId");
+                            String title = projectObject.getString("title");
+                            String description = projectObject.getString("description");
+                            
+                            Object[] array = {projectId, title, description};
+
+                            projectList.add(array);
+
+                        }
+                        
+                        paintProjectList();
+                        
+                    	JOptionPane.showMessageDialog(MainFrame.this, "Project list Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        
+                    } else {
+                        // 실패 시 오류 메시지 표시
+                        String message = jsonResponse.getString("message");
+                        JOptionPane.showMessageDialog(MainFrame.this, "Searching failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(MainFrame.this, "Searching Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
+	}
+	
+	public void paintProjectList() {
+		while(numBtn < projectList.size()) {
+			repaintButtonPanel();
+		}
+	}
 	
 	public void addProjectList(String title, String description) {
-		Object[] array = {title, description, projectId};
-		projectList.add(array);
+		//Object[] array = {projectId, title, description};
+		//projectList.add(array);
 		
 	}
 	
 	public void repaintButtonPanel() {
-		String title = (String)projectList.get(numBtn)[0];
+		String title = (String)projectList.get(numBtn)[1];
 		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
 		tempbtn.setActionCommand(String.valueOf(numBtn));
 		btnArray.add(tempbtn);
@@ -109,7 +202,7 @@ public class MainFrame extends JFrame {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				JButton sourceButton = (JButton) e.getSource();
-				long projId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[2];
+				long projId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];
 				accessProject(projId, title);
 			}
 		});
@@ -136,6 +229,10 @@ public class MainFrame extends JFrame {
 			new ProjectFrame(projId, title, this);
 			setVisible(false);
 		}
+	}
+	
+	public void addProjectArrayList(Object[] objects) {
+		projectList.add(objects);
 	}
 }
 
