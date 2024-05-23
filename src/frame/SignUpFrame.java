@@ -13,7 +13,7 @@ import javax.swing.*;
 import java.util.concurrent.ExecutionException;
 import org.json.JSONObject;
 
-class SignUpFrame extends JFrame {
+class SignUpFrame extends JDialog {
     private JTextField tfName;
     private JTextField tfID;
     private JPasswordField pfPassword;
@@ -22,6 +22,7 @@ class SignUpFrame extends JFrame {
     public SignUpFrame() {
         setTitle("Sign Up");
         setSize(400, 300);
+        setModal(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
