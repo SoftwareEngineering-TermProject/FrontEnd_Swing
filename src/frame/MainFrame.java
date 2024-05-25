@@ -4,8 +4,7 @@ import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleScrollBar;
 import util.RestClient;
-import util.RestClient_Delete
-;
+import util.RestClient_Delete;
 import javax.swing.*;
 
 import org.json.JSONArray;
@@ -32,19 +31,18 @@ public class MainFrame extends JFrame {
 	private JPanel btnPanel;
 	private JScrollPane scr;
 	private int numBtn = 0;
+	private static long userId;
 	
-	private long userId; // 임시, 나중에는 로그인하면 특정 static 변수에 저장되어서 통신 요청에 쓰여야 함. 지금은 임시로, 모든 프로젝트 접근 등 가능.
 	private ArrayList<Long> accessibleId; // 이것도 임시.
-	//private long projectId; // 이것도 임시. 
 	
 	//생성자
-	public MainFrame() {
+	public MainFrame(long userId) {
+		
+		this.userId = userId;
 		
 		readProjectList(""); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
 		
-		//임시
 		accessibleId = new ArrayList<>();
-		userId = 1;
 		//projectId = 12345678;
 		accessibleId.add(userId);
 		
@@ -301,6 +299,10 @@ public class MainFrame extends JFrame {
             }
         }.execute();
     }
+	
+	public long getUserId() {
+		return userId;
+	}
 		
 }
 
