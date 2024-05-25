@@ -42,4 +42,12 @@ public class ProjColor {
 	public static final Color customWindowScrollBarGray = new Color(211, 209, 203);
 	
 	public static final Color customWindowScrollPaneGray = new Color(237, 236, 233);
+
+	public static Color customDarkRed;
+
+	public static Color clickedCustomDarkRed;
+
+	public static Color customRed;
+
+	public static Color hoverCustomRed;
 }

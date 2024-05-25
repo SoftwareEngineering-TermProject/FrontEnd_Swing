@@ -4,7 +4,8 @@ import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleScrollBar;
 import util.RestClient;
-
+import util.RestClient_Delete
+;
 import javax.swing.*;
 
 import org.json.JSONArray;
@@ -99,6 +100,9 @@ public class MainFrame extends JFrame {
 		
 		// visible
 		setVisible(true);
+		
+		
+		
 	}
 	
 	public void readProjectList(String userName) {
@@ -190,14 +194,37 @@ public class MainFrame extends JFrame {
 	
 	public void repaintButtonPanel() {
 		String title = (String)projectList.get(numBtn)[1];
-		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
-		tempbtn.setActionCommand(String.valueOf(numBtn));
-		btnArray.add(tempbtn);
-		btnArray.get(numBtn).setBounds(31, 35 + 110 * numBtn, 997, 75);
-		btnPanel.add(btnArray.get(numBtn));
-		btnArray.get(numBtn).setPreferredSize(new Dimension(997, 75));
-		btnPanel.setPreferredSize(new Dimension(1000, 120 + 110 * numBtn));
+//		long projectId = (long) projectList.get(numBtn)[0];
 		
+		 ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
+		    tempbtn.setActionCommand(String.valueOf(numBtn));
+		    btnArray.add(tempbtn);
+		    tempbtn.setBounds(31, 35 + 110 * numBtn, 700, 75); // 크기 조정
+		    tempbtn.setPreferredSize(new Dimension(700, 75));
+		    btnPanel.add(tempbtn);
+		
+		// 삭제 버튼 생성
+		    ProjStyleButton deleteBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Delete");
+		    deleteBtn.setBounds(750, 35 + 110 * numBtn, 135, 75); // 삭제 버튼 위치 조정
+		    deleteBtn.setPreferredSize(new Dimension(135, 75));
+		    deleteBtn.setActionCommand(String.valueOf(numBtn));
+		    deleteBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // 테두리 추가
+		    deleteBtn.setFocusPainted(false);  // 포커스 테두리 제거
+		    deleteBtn.setContentAreaFilled(true); // 버튼 배경 채우기		    				    
+		    btnPanel.add(deleteBtn);
+
+	    deleteBtn.addMouseListener(new MouseAdapter() {
+	        @Override
+	        public void mouseReleased(MouseEvent e) {
+	            int index = Integer.parseInt(deleteBtn.getActionCommand());
+	            long projId = (long) projectList.get(index)[0];
+	            deleteProject(projId, index);
+	            deleteBtn.setBackground(ProjColor.customRed); // 기본 색상으로 복원
+	        }
+	        
+	          	        	        	   	        
+	    });
+			   		
 		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -214,9 +241,12 @@ public class MainFrame extends JFrame {
         scr.repaint();
 	}
 	
+	
 	public void newCreateProject() {
 		new CreateProjectDialog(this);
 	}
+	
+	
 	
 	public void accessProject(long projId, String title) {
 		//new ProjectFrame(title, this);
@@ -234,6 +264,44 @@ public class MainFrame extends JFrame {
 	public void addProjectArrayList(Object[] objects) {
 		projectList.add(objects);
 	}
+	
+	public void deleteProject(long projId, int index) {
+        new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                String url = String.format("http://localhost:8080/projects/%d?userId=%d", projId, userId);
+                return RestClient_Delete.sendDeleteRequest(url);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String response = get();
+                    System.out.println("Response from server: " + response);
+                    JSONObject jsonResponse = new JSONObject(response);
+                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                    String message = jsonResponse.getString("message");
+                    String code = jsonResponse.getString("code");
+
+                    if (isSuccess && "PROJECT_2000".equals(code)) {
+                        JOptionPane.showMessageDialog(MainFrame.this, "Project Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        // 삭제 성공 시 리스트에서 제거하고 UI 업데이트
+                        projectList.remove(index);
+                        btnPanel.removeAll();
+                        btnArray.clear();
+                        numBtn = 0;
+                        paintProjectList();
+                    } else {
+                        JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
+    }
+		
 }
 
 
