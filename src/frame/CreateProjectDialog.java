@@ -125,7 +125,7 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 	public void AddProject() {
 		String title = tf1.getText();
         String description = ta1.getText();
-        long userId = 12;
+        long userId = parentFrame.getUserId();
         
         String jsonInputString = String.format("{\"title\":\"%s\", \"description\":\"%s\"}", title, description);
         System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력

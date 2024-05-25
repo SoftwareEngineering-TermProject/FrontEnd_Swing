@@ -139,8 +139,12 @@ public class LoginFrame extends JFrame{
                     //System.out.println("code: " + code); 
                     //응답 결과 처리
                     if (isSuccess && "USER_1000".equals(code)) {
+                    	
+                    	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                    	long userId = resultObject.getLong("userId");
+                    	
                         // 성공 시 다음 프레임으로 이동
-                        new MainFrame();
+                        new MainFrame(userId);
                         setVisible(false);
                         dispose();
                     } else {

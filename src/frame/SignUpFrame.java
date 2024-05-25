@@ -93,9 +93,8 @@ class SignUpFrame extends JDialog {
         String password = new String(pfPassword.getPassword());
         String userRole = "DEV"; // 제거해야함.
         
-        //{"userName":"ymca", "password":"1234", "name":"jaemin", "userRole":"ADMIN"}
-        //userRole 제거해야함
-        String jsonInputString = String.format("{\"userName\":\"%s\", \"password\":\"%s\", \"name\":\"%s\", \"userRole\":\"%s\"}", userName, password, name, userRole);
+        //{"userName":"ymca", "password":"1234", "name":"jaemin"}
+        String jsonInputString = String.format("{\"userName\":\"%s\", \"password\":\"%s\", \"name\":\"%s\"}", userName, password, name);
         System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
 
         new SwingWorker<String, Void>() {
@@ -123,12 +122,7 @@ class SignUpFrame extends JDialog {
                         String message = jsonResponse.getString("message");
                         JOptionPane.showMessageDialog(SignUpFrame.this, "Login failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                    /*
-                    // 서버 응답 처리 (필요에 따라 추가)
-                    JOptionPane.showMessageDialog(SignUpFrame.this, "Sign Up Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    setVisible(false);
-                    dispose();
-                    */
+
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                     JOptionPane.showMessageDialog(SignUpFrame.this, "Sign Up Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
