@@ -41,7 +41,7 @@ public class MainFrame extends JFrame {
 		
 		this.userId = userId;
 		
-		readProjectList(""); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
+		readProjectList(); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
 		
 		accessibleId = new ArrayList<>();
 		//projectId = 12345678;
@@ -104,34 +104,16 @@ public class MainFrame extends JFrame {
 		setVisible(true);		
 	}
 	
-	public void readProjectList(String userName) {
+	public void readProjectList() {
 
         new SwingWorker<String, Void>() {
             @Override
             protected String doInBackground() throws Exception {
-            	// 파라미터를 URL 인코딩
-                String encodedUsername = URLEncoder.encode(userName, "UTF-8");
-
-                // URL에 파라미터 추가
+            	
                 String urlString = "http://localhost:8080/projects";
-                URL url = new URL(urlString + encodedUsername); // 
-                
-                // 연결 설정
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
-                con.setRequestProperty("Accept", "application/json");
 
-                // 응답 읽기
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String inputLine;
-                StringBuilder response = new StringBuilder();
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                // 응답 반환
-                return response.toString();
+                return RestClient_Get.sendGetRequest(urlString); //
+            	
             }
             @Override
             protected void done() {
