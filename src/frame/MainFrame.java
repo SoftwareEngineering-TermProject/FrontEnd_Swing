@@ -3,6 +3,7 @@ package frame;
 import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleScrollBar;
+import util.RestClient_Get;
 import util.RestClient;
 import util.RestClient_Delete;
 import javax.swing.*;
@@ -36,7 +37,7 @@ public class MainFrame extends JFrame {
 	private ArrayList<Long> accessibleId; // 이것도 임시.
 	
 	//생성자
-	public MainFrame(long userId) {
+	public MainFrame(long userId) {	
 		
 		this.userId = userId;
 		
@@ -94,13 +95,13 @@ public class MainFrame extends JFrame {
             }
         });
 		
+		
+	
+				
 		add(panel1);
 		
 		// visible
-		setVisible(true);
-		
-		
-		
+		setVisible(true);		
 	}
 	
 	public void readProjectList(String userName) {
@@ -218,11 +219,33 @@ public class MainFrame extends JFrame {
 	            long projId = (long) projectList.get(index)[0];
 	            deleteProject(projId, index);
 	            deleteBtn.setBackground(ProjColor.customRed); // 기본 색상으로 복원
-	        }
-	        
-	          	        	        	   	        
+	        }	          	        	        	   	        
 	    });
-			   		
+	    
+	    // 수정 버튼 추가
+	    ProjStyleButton modifyBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Modify");
+	    modifyBtn.setBounds(900, 35 + 110 * numBtn, 135, 75); //위치조정
+	    modifyBtn.setPreferredSize(new Dimension(135, 75));
+	    modifyBtn.setActionCommand(String.valueOf(numBtn));
+	    modifyBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // 테두리 추가
+	    modifyBtn.setFocusPainted(false);  // 포커스 테두리 제거
+	    modifyBtn.setContentAreaFilled(true); // 버튼 배경 채우기	
+	    btnPanel.add(modifyBtn);
+	    btnArray.add(modifyBtn);
+
+	    modifyBtn.addMouseListener(new MouseAdapter() {
+	        @Override
+	        public void mouseReleased(MouseEvent e) {
+	            JButton sourceButton = (JButton) e.getSource();
+	            int index = Integer.parseInt(sourceButton.getActionCommand());
+	            long projId = (long) projectList.get(index)[0];
+	            String currentTitle = (String) projectList.get(index)[1];
+	            String currentDescription = (String) projectList.get(index)[2];
+	            SwingUtilities.invokeLater(() -> new ProjModifyFrame(projId, currentTitle, currentDescription, userId, MainFrame.this));
+	            // 실행시 멈춤현상 발생 -->> 고쳐야됨.
+	        }
+	    });
+	    
 		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -262,7 +285,7 @@ public class MainFrame extends JFrame {
 	public void addProjectArrayList(Object[] objects) {
 		projectList.add(objects);
 	}
-	
+	//프로젝트 삭제기능
 	public void deleteProject(long projId, int index) {
         new SwingWorker<String, Void>() {
             @Override
@@ -299,6 +322,8 @@ public class MainFrame extends JFrame {
             }
         }.execute();
     }
+	
+	
 	
 	public long getUserId() {
 		return userId;
