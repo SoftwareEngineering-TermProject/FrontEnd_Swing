@@ -114,12 +114,9 @@ public class LoginFrame extends JFrame{
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
             protected String doInBackground() throws Exception { // 좀 수정이 필요할듯
-                String id = tf1.getText();
+                String userName = tf1.getText();
                 String password = new String(pf1.getPassword());
-                String userName = tf1.getText();  // id 필드를 userName으로 사용
-                String name = "FixedName";  // 고정 값 사용
-                String userRole = "ADMIN";  // 고정 값 사용
-                String jsonInputString = String.format("{\"id\":\"%s\", \"userName\":\"%s\", \"password\":\"%s\", \"name\":\"%s\", \"userRole\":\"%s\"}", id, userName, password, name, userRole);
+                String jsonInputString = String.format("{\"userName\":\"%s\", \"password\":\"%s\"}", userName, password);
                 System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
                 return RestClient.sendPostRequest("http://localhost:8080/users/sign_in", jsonInputString); // 실제 서버 URL 사용
             }
@@ -135,9 +132,6 @@ public class LoginFrame extends JFrame{
                     boolean isSuccess = jsonResponse.getBoolean("isSuccess");
                     String code = jsonResponse.getString("code");
                     
-                    //System.out.println("isSuccess: " + isSuccess);
-                    //System.out.println("code: " + code); 
-                    //응답 결과 처리
                     if (isSuccess && "USER_1000".equals(code)) {
                     	
                     	JSONObject resultObject = jsonResponse.getJSONObject("result");
