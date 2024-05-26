@@ -3,27 +3,35 @@ package frame;
 import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleTable;
+import util.RestClient;
+import util.RestClient_Get;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.*;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class ProjectFrame extends JFrame{
 	
 	private DefaultTableModel model;
 	private ArrayList<Object[]> issueList;
 	private int issueNum;
-	private ArrayList<Object[]> projectMember;
+	private long projectId;
 	
-	public ProjectFrame(long projId, String title, MainFrame parentFrame) {
+	public ProjectFrame(long projectId, String title, MainFrame parentFrame) {
 		
 		issueList = new ArrayList<>();
 		issueNum = 0;
-		projectMember = new ArrayList<>();
+		this.projectId = projectId;
 		
 		setTitle(title);
 		setSize(1150, 820);
@@ -151,13 +159,105 @@ public class ProjectFrame extends JFrame{
 		new NewIssuePage(this);
 	}
 	
-	public void addProjectMember(String userName, String userRole) { // userName(우리가 생각하는 id)
-		Object[] array = {userName, userRole};
-		projectMember.add(array);
+	public void addProjectMember(String userName, String userRole) {
+		new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+            	
+            	String encodedUserName = URLEncoder.encode(userName, "UTF-8");
+            	
+                String urlString = "http://localhost:8080/users?search=";
+
+                return RestClient_Get.sendGetRequest(urlString + encodedUserName);
+            	
+            }
+            @Override
+            protected void done() {
+                try {
+                    String response = get();
+                    System.out.println("Response from project server: " + response);
+                    
+                    JSONObject jsonResponse = new JSONObject(response);
+                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                    String code = jsonResponse.getString("code");
+                    
+                    if (isSuccess && "USER_1000".equals(code)) {
+                    	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                        JSONArray projectsArray = resultObject.getJSONArray("users");
+                        
+                        Object[] objects = new Object[projectsArray.length()];
+                        for (int i = 0; i < projectsArray.length(); i++) {
+                            JSONObject projectObject = projectsArray.getJSONObject(i);
+                            long userId = projectObject.getLong("userId");
+                            AddProjectUserDataBase(userId, userRole);
+
+                        }                        
+                        
+                    	JOptionPane.showMessageDialog(ProjectFrame.this, "Project list Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        
+                    } else {
+                        // 실패 시 오류 메시지 표시
+                        String message = jsonResponse.getString("message");
+                        JOptionPane.showMessageDialog(ProjectFrame.this, "Searching failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(ProjectFrame.this, "Searching Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
+	}
+	
+	private void AddProjectUserDataBase(long userId, String userRole) {
+		new SwingWorker<String, Void>() {
+            @Override
+            protected String doInBackground() throws Exception {
+
+                String encodedUserName = URLEncoder.encode(Long.toString(userId), "UTF-8");
+                String jsonInputString = String.format("{\"projectId\":\"%s\", \"userRole\":\"%s\"}", Long.toString(projectId), userRole);
+                System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
+                return RestClient.sendPostRequest("http://localhost:8080/projects/add/" + encodedUserName, jsonInputString); // 실제 서버 URL 사용
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String result = get();
+                    System.out.println("Server response: " + result);  // 서버 응답 출력
+                    
+                    // JSON 응답 파싱
+                    JSONObject jsonResponse = new JSONObject(result);
+                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                    String code = jsonResponse.getString("code");
+                    
+                    //System.out.println("isSuccess: " + isSuccess);
+                    //System.out.println("code: " + code); 
+                    //응답 결과 처리
+                    if (isSuccess && "PROJECT_2000".equals(code)) {
+                    	String message = jsonResponse.getString("message");
+                    	JOptionPane.showMessageDialog(ProjectFrame.this, "Login success: " + message, "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                    } else {
+                        // 실패 시 오류 메시지 표시
+                        String message = jsonResponse.getString("message");
+                        JOptionPane.showMessageDialog(ProjectFrame.this, "Login failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();  // 예외 메시지 출력
+                    JOptionPane.showMessageDialog(ProjectFrame.this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }.execute();
 	}
 	
 	public void createAddMemberPage() {
-		new addMemberPage(this);
+		new AddMemberPage(this);
+	}
+	
+	public long getProjectId() {
+		return projectId;
 	}
 	
 }

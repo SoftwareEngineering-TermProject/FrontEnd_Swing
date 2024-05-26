@@ -113,7 +113,7 @@ public class LoginFrame extends JFrame{
 	private void login() {
         SwingWorker<String, Void> worker = new SwingWorker<>() {
             @Override
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() throws Exception { // 좀 수정이 필요할듯
                 String id = tf1.getText();
                 String password = new String(pf1.getPassword());
                 String userName = tf1.getText();  // id 필드를 userName으로 사용
