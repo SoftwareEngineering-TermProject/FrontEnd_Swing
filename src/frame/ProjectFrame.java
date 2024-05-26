@@ -32,6 +32,7 @@ public class ProjectFrame extends JFrame{
 		issueList = new ArrayList<>();
 		issueNum = 0;
 		this.projectId = projectId;
+		System.out.println(projectId);
 		
 		setTitle(title);
 		setSize(1150, 820);
