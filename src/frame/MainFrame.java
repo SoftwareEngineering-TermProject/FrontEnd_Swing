@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -44,7 +45,6 @@ public class MainFrame extends JFrame {
 		readProjectList(); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
 		
 		accessibleId = new ArrayList<>();
-		//projectId = 12345678;
 		accessibleId.add(userId);
 		
 		setTitle("Main Frame");
@@ -175,24 +175,27 @@ public class MainFrame extends JFrame {
 	
 	public void repaintButtonPanel() {
 		String title = (String)projectList.get(numBtn)[1];
-//		long projectId = (long) projectList.get(numBtn)[0];
+		//long projectId = (long) projectList.get(numBtn)[0];
 		
-		 ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
-		    tempbtn.setActionCommand(String.valueOf(numBtn));
-		    btnArray.add(tempbtn);
-		    tempbtn.setBounds(31, 35 + 110 * numBtn, 700, 75); // 크기 조정
-		    tempbtn.setPreferredSize(new Dimension(700, 75));
-		    btnPanel.add(tempbtn);
+		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
+		tempbtn.setActionCommand(String.valueOf(numBtn));
+	    tempbtn.setBounds(31, 35 + 110 * numBtn, 700, 75); // 크기 조정
+	    tempbtn.setPreferredSize(new Dimension(700, 75));
+	    
+	    btnArray.add(tempbtn);
+	    btnPanel.add(tempbtn);
 		
+/*   
+	    
 		// 삭제 버튼 생성
-		    ProjStyleButton deleteBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Delete");
-		    deleteBtn.setBounds(750, 35 + 110 * numBtn, 135, 75); // 삭제 버튼 위치 조정
-		    deleteBtn.setPreferredSize(new Dimension(135, 75));
-		    deleteBtn.setActionCommand(String.valueOf(numBtn));
-		    deleteBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // 테두리 추가
-		    deleteBtn.setFocusPainted(false);  // 포커스 테두리 제거
-		    deleteBtn.setContentAreaFilled(true); // 버튼 배경 채우기		    				    
-		    btnPanel.add(deleteBtn);
+	    ProjStyleButton deleteBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Delete");
+	    deleteBtn.setBounds(750, 35 + 110 * numBtn, 135, 75); // 삭제 버튼 위치 조정
+	    deleteBtn.setPreferredSize(new Dimension(135, 75));
+	    deleteBtn.setActionCommand(String.valueOf(numBtn));
+	    deleteBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // 테두리 추가
+	    deleteBtn.setFocusPainted(false);  // 포커스 테두리 제거
+	    deleteBtn.setContentAreaFilled(true); // 버튼 배경 채우기		    				    
+	    btnPanel.add(deleteBtn);
 
 	    deleteBtn.addMouseListener(new MouseAdapter() {
 	        @Override
@@ -228,6 +231,8 @@ public class MainFrame extends JFrame {
 	        }
 	    });
 	    
+	    */
+	    
 		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -242,6 +247,43 @@ public class MainFrame extends JFrame {
 		
 		scr.revalidate();
         scr.repaint();
+        
+	}
+	
+	public void addNewProjectButton() {
+		String title = (String)projectList.get(numBtn)[1];
+		
+		for(int i = 0; i < btnArray.size(); i++) {
+			Rectangle bounds = btnArray.get(i).getBounds();
+			int x = bounds.x;
+            int y = bounds.y;
+            btnArray.get(i).setBounds(x, y + 110, 700, 75);
+		}
+		
+		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
+		tempbtn.setActionCommand(String.valueOf(numBtn));
+	    tempbtn.setBounds(31, 35, 700, 75); // 크기 조정
+	    tempbtn.setPreferredSize(new Dimension(700, 75));
+	    
+	    btnArray.add(tempbtn);
+	    btnPanel.add(tempbtn);
+	    
+	    btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				JButton sourceButton = (JButton) e.getSource();
+				long projId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];
+				accessProject(projId, title);
+			}
+		});
+		
+		btnPanel.revalidate();
+		numBtn++;
+		
+		scr.revalidate();
+        scr.repaint();
+		
+		
 	}
 	
 	
@@ -255,6 +297,7 @@ public class MainFrame extends JFrame {
 		//new ProjectFrame(title, this);
 		
 		//통신 요청으로 프로젝트 접속할때 userId 확인해서 접근 권한 있는지 체크. 일단은 임시로 느낌만 만듬.
+		/*
 		if(!accessibleId.contains(userId)) {
 			JOptionPane.showMessageDialog(MainFrame.this, "NOT accessible", "Error", JOptionPane.ERROR_MESSAGE);
 		}
@@ -262,6 +305,9 @@ public class MainFrame extends JFrame {
 			new ProjectFrame(projId, title, this);
 			setVisible(false);
 		}
+		*/
+		new ProjectFrame(projId, title, this);
+		setVisible(false);
 	}
 	
 	public void addProjectArrayList(Object[] objects) {

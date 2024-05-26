@@ -139,26 +139,6 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
                 // URL에 파라미터 추가
                 String urlString = "http://localhost:8080/projects/?userId=" + encodedUserId;
                 
-                /*
-                URL url = new URL(urlString + "/?userId=" +encodedUserId);
-
-                // 연결 설정
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
-                con.setRequestProperty("Accept", "application/json");
-
-                // 응답 읽기
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String inputLine;
-                StringBuilder response = new StringBuilder();
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                // 응답 반환
-                return response.toString();
-                */
                 return RestClient.sendPostRequest(urlString, jsonInputString);
             }
             @Override
@@ -181,8 +161,8 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 
                         parentFrame.addProjectArrayList(array);
                         
-                        parentFrame.repaintButtonPanel();
-                    	
+                        parentFrame.addNewProjectButton();
+
                     	JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         setVisible(false);
                         dispose();  	
