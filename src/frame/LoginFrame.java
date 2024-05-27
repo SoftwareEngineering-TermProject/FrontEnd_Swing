@@ -4,10 +4,15 @@ import style.ProjColor;
 import style.ProjStyleButton;
 import util.RestClient;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Dimension;
+import java.awt.FocusTraversalPolicy;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.*;
 import java.util.concurrent.ExecutionException;
 import org.json.JSONObject;
@@ -52,13 +57,14 @@ public class LoginFrame extends JFrame{
 		tf1.setBorder(null);
 		panel1.add(tf1);
 		tf1.setBounds(100, 143, 100, 20);
+		addFocusListenerToTextField(tf1);
 		
 		pf1 = new JPasswordField();
 		pf1.setBackground(ProjColor.customWhiteGray);
 		pf1.setBorder(null);
 		panel1.add(pf1);
 		pf1.setBounds(100, 173, 100, 20);
-		
+		addFocusListenerToTextField(pf1);
 	
 		ProjStyleButton btn1 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "LOG IN");
 		panel1.add(btn1);
@@ -106,6 +112,8 @@ public class LoginFrame extends JFrame{
 		*/
 	
 		add(panel1);
+		
+		this.setFocusTraversalPolicy(new CustomFocusTraversalPolicy(new Component[]{tf1, pf1}));
 		
 		setVisible(true);
 		
@@ -156,11 +164,70 @@ public class LoginFrame extends JFrame{
         worker.execute();
     }
 	
+	private static void addFocusListenerToTextField(JTextField textField) {
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textField.setCaretPosition(textField.getText().length());
+            }
+        });
+    }
+	
+	private static void addFocusListenerToTextField(JPasswordField passwordField) {
+        passwordField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.setCaretPosition(passwordField.getPassword().length);
+            }
+        });
+    }
+	
+	static class CustomFocusTraversalPolicy extends FocusTraversalPolicy {
+        private final Component[] components;
+
+        public CustomFocusTraversalPolicy(Component[] components) {
+            this.components = components;
+        }
+
+        @Override
+        public Component getComponentAfter(Container aContainer, Component aComponent) {
+            for (int i = 0; i < components.length; i++) {
+                if (components[i].equals(aComponent)) {
+                    return components[(i + 1) % components.length];
+                }
+            }
+            return components[0];
+        }
+
+        @Override
+        public Component getComponentBefore(Container aContainer, Component aComponent) {
+            for (int i = 0; i < components.length; i++) {
+                if (components[i].equals(aComponent)) {
+                    return components[(i - 1 + components.length) % components.length];
+                }
+            }
+            return components[0];
+        }
+
+        @Override
+        public Component getFirstComponent(Container aContainer) {
+            return components[0];
+        }
+
+        @Override
+        public Component getLastComponent(Container aContainer) {
+            return components[components.length - 1];
+        }
+
+        @Override
+        public Component getDefaultComponent(Container aContainer) {
+            return components[0];
+        }
+    }
 	
 	public static void main(String[] args) {
 		
 		SwingUtilities.invokeLater(LoginFrame::new);
-		// new MainFrame();
 		
 	}
 }
