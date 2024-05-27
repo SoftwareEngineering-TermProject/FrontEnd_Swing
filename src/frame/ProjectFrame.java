@@ -26,12 +26,13 @@ public class ProjectFrame extends JFrame{
 	private ArrayList<Object[]> issueList;
 	private int issueNum;
 	private long projectId;
-	
-	public ProjectFrame(long projectId, String title, MainFrame parentFrame) {
+	private long userId;
+	public ProjectFrame(long projectId, long userId, String title, MainFrame parentFrame) {
 		
 		issueList = new ArrayList<>();
 		issueNum = 0;
 		this.projectId = projectId;
+		this.userId = userId;
 		System.out.println(projectId);
 		
 		setTitle(title);
@@ -59,9 +60,21 @@ public class ProjectFrame extends JFrame{
 			}
 		});
 		
+		ProjStyleButton btn4 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "- remove issue");
+		panel1.add(btn4);
+		btn4.setBounds(511, 100, 219, 50);
+		btn4.setPreferredSize(new Dimension(218, 50));
+		
+		btn4.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				//함수구현
+			}
+		});
+		
 		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "+ add member");
 		panel1.add(btn2);
-		btn2.setBounds(285, 100, 220, 50);
+		btn2.setBounds(280, 100, 220, 50);
 		btn2.setPreferredSize(new Dimension(220, 50));
 		
 		btn2.addMouseListener(new MouseAdapter() {
@@ -113,11 +126,7 @@ public class ProjectFrame extends JFrame{
         table.setCellAlignment(7, JLabel.CENTER);
 		
 		model = (DefaultTableModel) table.getModel();
-        
-		for (int i = 1; i <= 20; i++) { // 데이터 받아와서 동적으로 추가
-            addIssue("draw picture", "tester1", "dev1", "dev1", "major", "closed", "24-04-30");
-            addModel();
-        }
+		 getIssuesFromServer();
         
         table.addMouseListener(new MouseAdapter() { // row가 동적으로 생성됨에 따라 이놈도 동적으로 생성되어야 하는데... 동적으로 생성될때마다 override를 해주자.
         	@Override
@@ -157,7 +166,7 @@ public class ProjectFrame extends JFrame{
 	}
 	
 	public void callAddIssue() {
-		new NewIssuePage(this);
+		new NewIssuePage(this, projectId, userId);
 	}
 	
 	public void addProjectMember(String userName, String userRole) {
@@ -208,6 +217,55 @@ public class ProjectFrame extends JFrame{
             }
         }.execute();
 	}
+	
+	//이슈목록을 서버로부터 가져오는 코드. 
+	public void getIssuesFromServer() {
+	    new SwingWorker<String, Void>() {
+	        @Override
+	        protected String doInBackground() throws Exception {
+	            String urlString = String.format("http://localhost:8080/issues/list/%d", projectId);
+	            return RestClient_Get.sendGetRequest(urlString);
+	        }
+
+	        @Override
+	        protected void done() {
+	            try {
+	                String response = get();
+	                System.out.println("Response from server: " + response);
+
+	                JSONObject jsonResponse = new JSONObject(response);
+	                boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+	                String code = jsonResponse.getString("code");
+
+	                if (isSuccess && "ISSUE_3000".equals(code)) {
+	                    JSONObject issuesArray = jsonResponse.getJSONObject("result");
+	                    JSONArray projectsArray = issuesArray.getJSONArray("issues");
+                        
+	                    for (int i = 0; i < projectsArray.length(); i++) {
+	                        JSONObject issueObject = projectsArray.getJSONObject(i);
+	                        String title = issueObject.getString("title");
+	                        String reporter = issueObject.getJSONObject("user").getString("userName");
+	                        String fixer = issueObject.isNull("fixer") ? "None" : issueObject.getString("fixer");
+	                        String assignee = issueObject.isNull("assignee") ? "None" : issueObject.getString("assignee");
+	                        String priority = "MAJOR"; // Assuming priority is not present in JSON
+	                        String status = issueObject.getString("issueStatus");
+	                        String date = issueObject.getString("createAt").split("T")[0]; // Assuming date format is "YYYY-MM-DDTHH:MM:SS"
+
+	                        addIssue(title, reporter, fixer, assignee, priority, status, date);
+	                        addModel();
+	                    }
+	                } else {
+	                    String message = jsonResponse.getString("message");
+	                    JOptionPane.showMessageDialog(ProjectFrame.this, "이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	                }
+	            } catch (InterruptedException | ExecutionException e) {
+	                e.printStackTrace();
+	                JOptionPane.showMessageDialog(ProjectFrame.this, "이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	            }
+	        }
+	    }.execute();
+	}
+
 	
 	private void AddProjectUserDataBase(long userId, String userRole) {
 		new SwingWorker<String, Void>() {
