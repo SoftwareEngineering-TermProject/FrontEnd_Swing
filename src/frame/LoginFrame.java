@@ -4,10 +4,15 @@ import style.ProjColor;
 import style.ProjStyleButton;
 import util.RestClient;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Dimension;
+import java.awt.FocusTraversalPolicy;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.*;
 import java.util.concurrent.ExecutionException;
 import org.json.JSONObject;
@@ -52,13 +57,14 @@ public class LoginFrame extends JFrame{
 		tf1.setBorder(null);
 		panel1.add(tf1);
 		tf1.setBounds(100, 143, 100, 20);
+		addFocusListenerToTextField(tf1);
 		
 		pf1 = new JPasswordField();
 		pf1.setBackground(ProjColor.customWhiteGray);
 		pf1.setBorder(null);
 		panel1.add(pf1);
 		pf1.setBounds(100, 173, 100, 20);
-		
+		addFocusListenerToTextField(pf1);
 	
 		ProjStyleButton btn1 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "LOG IN");
 		panel1.add(btn1);
@@ -86,7 +92,7 @@ public class LoginFrame extends JFrame{
 		
 		
 		
-		
+		/* 아이디 까먹었을때 버튼
 		ProjStyleButton btn3 = new ProjStyleButton(ProjColor.customGray, ProjColor.customGray, Color.BLACK, "Forgot your ID/password?"); // 클릭/릴리즈 시 텍스트 변하게
 		panel1.add(btn3);
 		btn3.setBounds(20, 220, 228, 23);
@@ -103,8 +109,11 @@ public class LoginFrame extends JFrame{
 				btn3.setForeground(Color.BLACK);
 			}
 		});
+		*/
 	
 		add(panel1);
+		
+		this.setFocusTraversalPolicy(new CustomFocusTraversalPolicy(new Component[]{tf1, pf1}));
 		
 		setVisible(true);
 		
@@ -144,22 +153,89 @@ public class LoginFrame extends JFrame{
                     } else {
                         // 실패 시 오류 메시지 표시
                         String message = jsonResponse.getString("message");
-                        JOptionPane.showMessageDialog(LoginFrame.this, "Login failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(LoginFrame.this, "접속 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();  // 예외 메시지 출력
-                    JOptionPane.showMessageDialog(LoginFrame.this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    if (e.getMessage().equals("java.net.ConnectException: Connection refused: connect")) {
+                    	JOptionPane.showMessageDialog(LoginFrame.this, "접속 실패: 서버와 연결이 되지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else if (e.getMessage().equals("java.lang.RuntimeException: Failed : HTTP error code : 500")) {
+                    	JOptionPane.showMessageDialog(LoginFrame.this, "접속 실패: 아이디 또는 비밀번호가 일치하지 않습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else {
+                    	JOptionPane.showMessageDialog(LoginFrame.this, "접속 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         };
         worker.execute();
     }
 	
+	private static void addFocusListenerToTextField(JTextField textField) {
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textField.setCaretPosition(textField.getText().length());
+            }
+        });
+    }
+	
+	private static void addFocusListenerToTextField(JPasswordField passwordField) {
+        passwordField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                passwordField.setCaretPosition(passwordField.getPassword().length);
+            }
+        });
+    }
+	
+	static class CustomFocusTraversalPolicy extends FocusTraversalPolicy {
+        private final Component[] components;
+
+        public CustomFocusTraversalPolicy(Component[] components) {
+            this.components = components;
+        }
+
+        @Override
+        public Component getComponentAfter(Container aContainer, Component aComponent) {
+            for (int i = 0; i < components.length; i++) {
+                if (components[i].equals(aComponent)) {
+                    return components[(i + 1) % components.length];
+                }
+            }
+            return components[0];
+        }
+
+        @Override
+        public Component getComponentBefore(Container aContainer, Component aComponent) {
+            for (int i = 0; i < components.length; i++) {
+                if (components[i].equals(aComponent)) {
+                    return components[(i - 1 + components.length) % components.length];
+                }
+            }
+            return components[0];
+        }
+
+        @Override
+        public Component getFirstComponent(Container aContainer) {
+            return components[0];
+        }
+
+        @Override
+        public Component getLastComponent(Container aContainer) {
+            return components[components.length - 1];
+        }
+
+        @Override
+        public Component getDefaultComponent(Container aContainer) {
+            return components[0];
+        }
+    }
 	
 	public static void main(String[] args) {
 		
 		SwingUtilities.invokeLater(LoginFrame::new);
-		// new MainFrame();
 		
 	}
 }

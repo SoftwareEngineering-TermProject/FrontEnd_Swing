@@ -15,9 +15,9 @@ import org.json.JSONObject;
 
 class SignUpFrame extends JDialog {
     private JTextField tfName;
-    private JTextField tfID;
+    private JTextField tfUserName;
     private JPasswordField pfPassword;
-    private JComboBox<String> cbUserRole;
+    //private JComboBox<String> cbUserRole;
 
     public SignUpFrame() {
         setTitle("Sign Up");
@@ -44,11 +44,11 @@ class SignUpFrame extends JDialog {
         lblID.setBounds(50, 80, 80, 25);
         panel.add(lblID);
 
-        tfID = new JTextField();
-        tfID.setBounds(150, 80, 165, 25);
-        tfID.setBackground(ProjColor.customDarkGray);
-        tfID.setBorder(null);
-        panel.add(tfID);
+        tfUserName = new JTextField();
+        tfUserName.setBounds(150, 80, 165, 25);
+        tfUserName.setBackground(ProjColor.customDarkGray);
+        tfUserName.setBorder(null);
+        panel.add(tfUserName);
 
         JLabel lblPassword = new JLabel("Password:");
         lblPassword.setBounds(50, 110, 80, 25);
@@ -89,7 +89,7 @@ class SignUpFrame extends JDialog {
     
 	private void signUp() {
         String name = tfName.getText();
-        String userName = tfID.getText();
+        String userName = tfUserName.getText();
         String password = new String(pfPassword.getPassword());
         String userRole = "DEV"; // 제거해야함.
         
@@ -113,19 +113,26 @@ class SignUpFrame extends JDialog {
                     String code = jsonResponse.getString("code");
                     
                     if (isSuccess && "USER_1000".equals(code)) {
-                    	//성공시 DB에 저장하는 코드 삽입예정
-                    	JOptionPane.showMessageDialog(SignUpFrame.this, "Sign Up Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    	JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 성공!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         setVisible(false);
                         dispose();  	
                     } else {
                         // 실패 시 오류 메시지 표시
                         String message = jsonResponse.getString("message");
-                        JOptionPane.showMessageDialog(SignUpFrame.this, "Login failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                     }
 
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(SignUpFrame.this, "Sign Up Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    if (e.getMessage().equals("java.net.ConnectException: Connection refused: connect")) {
+                    	JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: 서버와 연결이 되지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else if (e.getMessage().equals("java.lang.RuntimeException: Failed : HTTP error code : 409")) {
+                        JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: 사용중인 아이디입니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else {
+                    	JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         }.execute();

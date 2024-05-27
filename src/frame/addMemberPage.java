@@ -151,9 +151,6 @@ class AddMemberPage extends JDialog {
                         
                         readProjectMember();
                         
-                        
-                    	JOptionPane.showMessageDialog(AddMemberPage.this, "Project list Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        
                     } else {
                         // 실패 시 오류 메시지 표시
                         String message = jsonResponse.getString("message");
@@ -210,8 +207,6 @@ class AddMemberPage extends JDialog {
                         }
                         
                         CreateComboBox();
-                        
-                    	JOptionPane.showMessageDialog(AddMemberPage.this, "Project list Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         
                     } else {
                         // 실패 시 오류 메시지 표시

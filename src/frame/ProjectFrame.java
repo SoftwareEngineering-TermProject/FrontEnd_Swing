@@ -194,18 +194,16 @@ public class ProjectFrame extends JFrame{
 
                         }                        
                         
-                    	JOptionPane.showMessageDialog(ProjectFrame.this, "Project list Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        
                     } else {
                         // 실패 시 오류 메시지 표시
                         String message = jsonResponse.getString("message");
-                        JOptionPane.showMessageDialog(ProjectFrame.this, "Searching failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                     }
 
                     
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(ProjectFrame.this, "Searching Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }.execute();
@@ -236,22 +234,19 @@ public class ProjectFrame extends JFrame{
                     //System.out.println("isSuccess: " + isSuccess);
                     //System.out.println("code: " + code); 
                     //응답 결과 처리
-                    if (isSuccess && "PROJECT_2000".equals(code)) {
-                    	String message = jsonResponse.getString("message");
-                    	JOptionPane.showMessageDialog(ProjectFrame.this, "Login success: " + message, "Success", JOptionPane.INFORMATION_MESSAGE);
-
-                    } else {
-                        // 실패 시 오류 메시지 표시
+                    if (!isSuccess || !"PROJECT_2000".equals(code)) {
+                    	// 실패 시 오류 메시지 표시
                         String message = jsonResponse.getString("message");
-                        JOptionPane.showMessageDialog(ProjectFrame.this, "Login failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 유저 추가 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();  // 예외 메시지 출력
-                    JOptionPane.showMessageDialog(ProjectFrame.this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 유저 추가 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }.execute();
 	}
+	
 	
 	public void createAddMemberPage() {
 		new AddMemberPage(this);
