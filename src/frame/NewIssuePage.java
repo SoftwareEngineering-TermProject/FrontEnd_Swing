@@ -9,32 +9,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import util.RestClient;
-import util.RestClient_Get;
-import javax.swing.*;
 
-import java.util.concurrent.ExecutionException;
+import javax.swing.*;
 
 import style.ProjColor;
 import style.ProjStyleButton;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import style.ProjStyleScrollBar;
+
 public class NewIssuePage extends JDialog {
 	
 	private ProjectFrame parentFrame;
-	private String userName;
+	private String userRole; // 임시.
 	private JTextField tf1;
 	private JTextArea ta1;
-	private long projectId;
-    private long userId;
-    
-	public NewIssuePage(ProjectFrame parentFrame, long projectId, long userId) {
+	
+	public NewIssuePage(ProjectFrame parentFrame) {
 		
 		this.parentFrame= parentFrame;
-		this.projectId = projectId;
-        this.userId = userId;
-		userName = getUsernameByUserId(userId);
-	
+		
+		//임시
+		userRole = "TESTER";
+		
 		setSize(560, 480);
 		setLocationRelativeTo(null); // 화면 중앙 위치
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -124,95 +119,108 @@ public class NewIssuePage extends JDialog {
 	
 	public void addIssueRow() {
 		String title = tf1.getText().trim();
-		String description = ta1.getText().trim();
-
+		LocalDate now = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd");
+		String formatedNow = now.format(formatter);
+		
 		if (title.equals("")) {
 			JOptionPane.showMessageDialog(NewIssuePage.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		else {
-			sendIssueRequest(projectId, title, description, userId);
+			parentFrame.addIssue(title, userRole, "None", "None", "None", "New", formatedNow);
+			parentFrame.addModel();
 			setVisible(false);
 			dispose();
-			
 		}
 	}
 	
-    
-    private void sendIssueRequest(long projectId, String title, String description, long userId) {
-        String jsonInputString = String.format("{\"projectId\":%d, \"title\":\"%s\", \"description\":\"%s\", \"issuePriority\":\"MAJOR\"}", projectId, title, description);
-
-        new SwingWorker<String, Void>() {
-            @Override
-            protected String doInBackground() throws Exception {
-                String url = String.format("http://localhost:8080/issues/?userId=%d", userId);
-                return RestClient.sendPostRequest(url, jsonInputString);
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    String response = get();
-                    System.out.println("Response from server: " + response);
-                    JSONObject jsonResponse = new JSONObject(response);
-                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
-                    String message = jsonResponse.getString("message");
-                    String code = jsonResponse.getString("code");
-                    
-            		LocalDate now = LocalDate.now();
-            		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd");
-            		String formatedNow = now.format(formatter);
-                    
-
-                    if (isSuccess && "ISSUE_3000".equals(code)) {
-                    	parentFrame.addIssue(title, userName, "None", "None", "MAJOR", "NEW", formatedNow);
-                        parentFrame.addModel();
-                        JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Created Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        setVisible(false);
-                        dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Creation Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Creation Failed: 이슈생성 권한이 없습니다. " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        }.execute();
-    }	
-	
-    //userId로 userName 받아오는 코드. 
-    private String getUsernameByUserId(long userId) {
-        String url = String.format("http://localhost:8080/users");
-
-        try {
-            String response = RestClient_Get.sendGetRequest(url);
-            System.out.println("Response from server: " + response);
-
-            JSONObject jsonResponse = new JSONObject(response);
-            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
-            String code = jsonResponse.getString("code");
-            
-            if (isSuccess && "USER_1000".equals(code)) {
-                JSONObject resultObject = jsonResponse.getJSONObject("result");
-                JSONArray usersArray = resultObject.getJSONArray("users");
-                for (int i = 0; i < usersArray.length(); i++) {
-                    JSONObject user = usersArray.getJSONObject(i);
-                    if (user.getLong("userId") == userId) {
-                        return user.getString("userName");
-                    }
-                }
-                throw new RuntimeException("User ID not found");
-            } else {
-                throw new RuntimeException("Failed to get username: " + jsonResponse.getString("message"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error occurred while fetching username", e);
-        }
-    }
-    
 }
 
 	
 
-	
+	/*
+	public NewIssuePage() {
+		setSize(700,400);
+		setLocationRelativeTo(null);
+		setModal(true);
+		setUndecorated(true);
+		
+		JPanel panel1 = new JPanel();
+		panel1.setLayout(null);
+		panel1.setBackground(ProjColor.customWhiteGray);
+		panel1.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		
+		ProjStyleButton btn1 = new ProjStyleButton(ProjColor.customWhiteGray, ProjColor.customWhiteGray, Color.BLACK, "X");
+		btn1.setFont(new Font(null, Font.PLAIN, 50));
+		panel1.add(btn1);
+		btn1.setBounds(650, 20, 30, 35);
+		btn1.setPreferredSize(new Dimension(30, 35));
+		
+		btn1.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				setVisible(false);
+				dispose();
+			}
+		});
+		
+		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "ADD");
+		btn2.setFont(new Font(null, Font.PLAIN, 20));
+		panel1.add(btn2);
+		btn2.setBounds(550, 70, 80, 35);
+		btn2.setPreferredSize(new Dimension(80, 35));
+		
+		btn2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				setVisible(false);
+				dispose();
+			}
+		});
+		
+		JLabel lbl1 = new JLabel("Add New Issue");
+		lbl1.setFont(new Font(null, Font.PLAIN, 40));
+		panel1.add(lbl1);
+		lbl1.setBounds(10, 10, 300, 40);
+		lbl1.setPreferredSize(new Dimension(300, 40));
+		
+		JLabel lbl2 = new JLabel("Issue title :");
+		lbl2.setFont(new Font(null, Font.PLAIN, 20));
+		panel1.add(lbl2);
+		lbl2.setBounds(10, 70, 190, 40);
+		lbl2.setPreferredSize(new Dimension(190, 40));
+		
+		JLabel lbl3 = new JLabel("Add description");
+		lbl3.setFont(new Font(null, Font.PLAIN, 20));
+		panel1.add(lbl3);
+		lbl3.setBounds(10, 120, 190, 40);
+		lbl3.setPreferredSize(new Dimension(190, 40));
+		
+		JTextField tf = new JTextField();
+		tf.setBorder(null);
+		tf.setBackground(ProjColor.customLightGray);
+		panel1.add(tf);
+		tf.setBounds(115, 80, 190, 30);
+		tf.setPreferredSize(new Dimension(190, 30));
+		
+		JTextArea ta = new JTextArea();
+		ta.setFont(new Font("맑은 고딕", 1, 15));
+		ta.setBackground(ProjColor.customLightGray);
+		ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+		ta.setBorder(null);
+		
+		JScrollPane scrollPane = new JScrollPane(ta);
+		scrollPane.setVerticalScrollBar(new ProjStyleScrollBar());
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        panel1.add(scrollPane);
+        scrollPane.setBounds(30, 165, 600, 200);
+        scrollPane.setPreferredSize(new Dimension(600, 200));
+        scrollPane.setBorder(null);//BorderFactory.createLineBorder(Color.GRAY, 1));
+		
+		add(panel1);
+		
+		setVisible(true);
+	}
+}
+*/

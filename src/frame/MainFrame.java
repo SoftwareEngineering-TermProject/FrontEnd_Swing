@@ -22,29 +22,41 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
 
 public class MainFrame extends JFrame {
 	private ArrayList<Object[]> projectList = new ArrayList<>();
-	private ArrayList<ProjStyleButton> btnArray = new ArrayList<>();
+	private ArrayList<ProjStyleButton> projectBtnArray;
 	private JPanel btnPanel;
 	private JScrollPane scr;
 	private int numBtn = 0;
 	private static long userId;
+	private boolean modifyMode;
+	private boolean deleteMode;
+	private ArrayList<MouseListener> entryProjectListeners;
+	private ArrayList<MouseListener> modifyProjectListeners;
+	private ArrayList<MouseListener> deleteProjectListeners;
 	
 	private ArrayList<Long> accessibleId; // 이것도 임시.
 	
 	//생성자
 	public MainFrame(long userId) {	
-		
+		projectBtnArray = new ArrayList<>();
 		this.userId = userId;
+		modifyMode = false;
+		deleteMode = false;
+		entryProjectListeners = new ArrayList<>();
+		modifyProjectListeners = new ArrayList<>();
+		deleteProjectListeners = new ArrayList<>();
 		
 		readProjectList(); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
 		
@@ -70,7 +82,7 @@ public class MainFrame extends JFrame {
 		btnPanel.setBackground(ProjColor.customDarkGray);
 		btnPanel.setLayout(null);
 		//btnPanel.setBounds(48, 95, 1062, 680);
-		btnPanel.setPreferredSize(new Dimension(1000, 120));;
+		btnPanel.setPreferredSize(new Dimension(1000, 120));
 		
 		scr = new JScrollPane(btnPanel);
 		scr.setBackground(ProjColor.customDarkGray);
@@ -87,15 +99,138 @@ public class MainFrame extends JFrame {
 		panel1.add(lbl1);
 		lbl1.setBounds(20,1,400,80);
 		
-		ProjStyleButton btn4 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "+ new project");
+		ProjStyleButton btn4 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "modify");
 		panel1.add(btn4);
-		btn4.setBounds(890, 24, 220, 57);
-		btn4.setPreferredSize(new Dimension(220, 57));
-		
+		btn4.setBounds(550, 24, 150, 57);
+		btn4.setPreferredSize(new Dimension(150, 57));
 		btn4.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) { // 원래 기능 + new
-            	newCreateProject();
+            	if(!deleteMode) {
+	            	modifyMode = !modifyMode;
+	            	if(modifyMode) {
+	            		for(int i = 0; i < projectBtnArray.size(); i++) {
+	            			projectBtnArray.get(i).setBackground(ProjColor.customDarkGreen);
+	            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkGreen);
+	            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkGreen);
+	            			projectBtnArray.get(i).removeMouseListener(entryProjectListeners.get(i));
+	            			projectBtnArray.get(i).addMouseListener(modifyProjectListeners.get(i));
+	            		}
+	            	}
+	            	else {
+	            		for(int i = 0; i < projectBtnArray.size(); i++) {
+	            			projectBtnArray.get(i).setBackground(ProjColor.customDarkSkyblue);
+	            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkSkyblue);
+	            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkSkyblue);
+	            			projectBtnArray.get(i).removeMouseListener(modifyProjectListeners.get(i));
+	            			projectBtnArray.get(i).addMouseListener(entryProjectListeners.get(i));
+	            		}
+	            	}
+            	}
+            	else {
+            		deleteMode = !deleteMode;
+            		for(int i = 0; i < numBtn; i++) {
+            			projectBtnArray.get(i).setBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkSkyblue);
+            			projectBtnArray.get(i).removeMouseListener(deleteProjectListeners.get(i));
+            			projectBtnArray.get(i).addMouseListener(entryProjectListeners.get(i));
+            		}
+            		modifyMode = !modifyMode;
+            		for(int i = 0; i < projectBtnArray.size(); i++) {
+            			projectBtnArray.get(i).setBackground(ProjColor.customDarkGreen);
+            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkGreen);
+            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkGreen);
+            			projectBtnArray.get(i).removeMouseListener(entryProjectListeners.get(i));
+            			projectBtnArray.get(i).addMouseListener(modifyProjectListeners.get(i));
+            		}
+            	}
+            }
+        });
+		
+		ProjStyleButton btn5 = new ProjStyleButton(ProjColor.customWhiteRed, ProjColor.clickedCustomWhiteRed, Color.BLACK, "delete");
+		panel1.add(btn5);
+		btn5.setBounds(720, 24, 150, 57);
+		btn5.setPreferredSize(new Dimension(150, 57));
+		
+		btn5.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) { // 원래 기능 + new
+            	if (!modifyMode) {
+            		deleteMode = !deleteMode;
+	            	if(deleteMode) {
+	            		for(int i = 0; i < numBtn; i++) {
+	            			projectBtnArray.get(i).setBackground(ProjColor.customLightRed);
+	            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customLightRed);
+	            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomLightRed);
+	            			projectBtnArray.get(i).removeMouseListener(entryProjectListeners.get(i));
+	            			projectBtnArray.get(i).addMouseListener(deleteProjectListeners.get(i));
+	            		}
+	            	}
+	            	else {
+	            		for(int i = 0; i < numBtn; i++) {
+	            			projectBtnArray.get(i).setBackground(ProjColor.customDarkSkyblue);
+	            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkSkyblue);
+	            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkSkyblue);
+	            			projectBtnArray.get(i).removeMouseListener(deleteProjectListeners.get(i));
+	            			projectBtnArray.get(i).addMouseListener(entryProjectListeners.get(i));
+	            		}
+	            	}
+            	}
+            	else {
+            		modifyMode = !modifyMode;
+            		for(int i = 0; i < projectBtnArray.size(); i++) {
+            			projectBtnArray.get(i).setBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkSkyblue);
+            			projectBtnArray.get(i).removeMouseListener(modifyProjectListeners.get(i));
+            			projectBtnArray.get(i).addMouseListener(entryProjectListeners.get(i));
+            		}
+            		deleteMode = !deleteMode;
+            		for(int i = 0; i < numBtn; i++) {
+            			projectBtnArray.get(i).setBackground(ProjColor.customLightRed);
+            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customLightRed);
+            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomLightRed);
+            			projectBtnArray.get(i).removeMouseListener(entryProjectListeners.get(i));
+            			projectBtnArray.get(i).addMouseListener(deleteProjectListeners.get(i));
+            		}
+            	}
+            }
+        });
+		
+		ProjStyleButton btn6 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "+ new project");
+		panel1.add(btn6);
+		btn6.setBounds(890, 24, 220, 57);
+		btn6.setPreferredSize(new Dimension(220, 57));
+		
+		btn6.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) { // 원래 기능 + new
+            	if(modifyMode) {
+            		modifyMode = !modifyMode;
+            		for(int i = 0; i < projectBtnArray.size(); i++) {
+            			projectBtnArray.get(i).setBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkSkyblue);
+            			projectBtnArray.get(i).removeMouseListener(modifyProjectListeners.get(i));
+            			projectBtnArray.get(i).addMouseListener(entryProjectListeners.get(i));
+            		}
+            		newCreateProject();
+            	}
+            	else if (deleteMode) {
+            		deleteMode = !deleteMode;
+            		for(int i = 0; i < numBtn; i++) {
+            			projectBtnArray.get(i).setBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setUnClickBackground(ProjColor.customDarkSkyblue);
+            			projectBtnArray.get(i).setClickBackground(ProjColor.clickedCustomDarkSkyblue);
+            			projectBtnArray.get(i).removeMouseListener(deleteProjectListeners.get(i));
+            			projectBtnArray.get(i).addMouseListener(entryProjectListeners.get(i));
+            		}
+            		newCreateProject();
+            	}
+            	else {
+            		newCreateProject();
+            	}
             }
         });
 		
@@ -172,114 +307,16 @@ public class MainFrame extends JFrame {
 	public void addProjectList(String title, String description) {
 		//Object[] array = {projectId, title, description};
 		//projectList.add(array);
-		
 	}
-	/*
-	public void repaintButtonPanel() {
-		String title = (String)projectList.get(numBtn)[1];
-		//long projectId = (long) projectList.get(numBtn)[0];
-		
-		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
-			@Override
-		    public void paintComponent(Graphics g) {
-		        Graphics2D g2 = (Graphics2D) g;
-		        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-		        Dimension dimension = getPreferredSize();
-		        int w = (int) dimension.getWidth();
-		        int h = (int) dimension.getHeight();
-
-		        g2.setColor(getBackground());
-		        g2.fillRoundRect(0, 0, w, h, 50, 50);
-
-		        g2.setColor(getForeground());
-
-		        FontMetrics fontMetrics = g2.getFontMetrics();
-		        Rectangle rectangle = fontMetrics.getStringBounds(getText(), g2).getBounds();
-
-		        g2.drawString(getText(), (w - rectangle.width) / 2, (h - rectangle.height) / 2 + fontMetrics.getAscent());
-		    }
-		};
-		tempbtn.setActionCommand(String.valueOf(numBtn));
-	    tempbtn.setBounds(31, 35 + 110 * numBtn, 700, 75); // 크기 조정
-	    tempbtn.setPreferredSize(new Dimension(700, 75));
-	    
-	    btnArray.add(tempbtn);
-	    btnPanel.add(tempbtn);
-		
-	     
-	    
-		// 삭제 버튼 생성
-	    ProjStyleButton deleteBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Delete");
-	    deleteBtn.setBounds(750, 35 + 110 * numBtn, 135, 75); // 삭제 버튼 위치 조정
-	    deleteBtn.setPreferredSize(new Dimension(135, 75));
-	    deleteBtn.setActionCommand(String.valueOf(numBtn));
-	    deleteBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // 테두리 추가
-	    deleteBtn.setFocusPainted(false);  // 포커스 테두리 제거
-	    deleteBtn.setContentAreaFilled(true); // 버튼 배경 채우기		    				    
-	    btnPanel.add(deleteBtn);
-
-	    deleteBtn.addMouseListener(new MouseAdapter() {
-	        @Override
-	        public void mouseReleased(MouseEvent e) {
-	            int index = Integer.parseInt(deleteBtn.getActionCommand());
-	            long projId = (long) projectList.get(index)[0];
-	            deleteProject(projId, index);
-	            deleteBtn.setBackground(ProjColor.customRed); // 기본 색상으로 복원
-	        }	          	        	        	   	        
-	    });
-	    
-	    // 수정 버튼 추가
-	    ProjStyleButton modifyBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Modify");
-	    modifyBtn.setBounds(900, 35 + 110 * numBtn, 135, 75); //위치조정
-	    modifyBtn.setPreferredSize(new Dimension(135, 75));
-	    modifyBtn.setActionCommand(String.valueOf(numBtn));
-	    modifyBtn.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // 테두리 추가
-	    modifyBtn.setFocusPainted(false);  // 포커스 테두리 제거
-	    modifyBtn.setContentAreaFilled(true); // 버튼 배경 채우기	
-	    btnPanel.add(modifyBtn);
-	    btnArray.add(modifyBtn);
-
-	    modifyBtn.addMouseListener(new MouseAdapter() {
-	        @Override
-	        public void mouseReleased(MouseEvent e) {
-	            JButton sourceButton = (JButton) e.getSource();
-	            int index = Integer.parseInt(sourceButton.getActionCommand());
-	            long projId = (long) projectList.get(index)[0];
-	            String currentTitle = (String) projectList.get(index)[1];
-	            String currentDescription = (String) projectList.get(index)[2];
-	            SwingUtilities.invokeLater(() -> new ProjModifyFrame(projId, currentTitle, currentDescription, userId, MainFrame.this));
-	            // 실행시 멈춤현상 발생 -->> 고쳐야됨.
-	        }
-	    });
-	    
-	    
-	    
-		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				JButton sourceButton = (JButton) e.getSource();
-				long projId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];
-				accessProject(projId, title);
-			}
-		});
-		
-		btnPanel.revalidate();
-		numBtn++;
-		
-		scr.revalidate();
-        scr.repaint();
-        
-	}
-	*/
+	
 	public void addNewProjectButton() {
 		String title = (String)projectList.get(numBtn)[1];
 		
-		for(int i = 0; i < btnArray.size(); i++) {
-			Rectangle bounds = btnArray.get(i).getBounds();
+		for(int i = 0; i < projectBtnArray.size(); i++) {
+			Rectangle bounds = projectBtnArray.get(i).getBounds();
 			int x = bounds.x;
             int y = bounds.y;
-            btnArray.get(i).setBounds(x, y + 110, 700, 75);
+            projectBtnArray.get(i).setBounds(x, y + 110, 1000, 75);
 		}
 		
 		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
@@ -304,38 +341,66 @@ public class MainFrame extends JFrame {
 		    }
 		};
 		tempbtn.setActionCommand(String.valueOf(numBtn));
-	    tempbtn.setBounds(31, 35, 700, 75); // 크기 조정
-	    tempbtn.setPreferredSize(new Dimension(700, 75));
+	    tempbtn.setBounds(31, 35, 1000, 75); // 크기 조정
+	    tempbtn.setPreferredSize(new Dimension(1000, 75));
 	    
-	    btnArray.add(tempbtn);
+	    projectBtnArray.add(tempbtn);
 	    btnPanel.add(tempbtn);
 	    
-	    btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
+	    entryProjectListeners.add(createProjectBtnMouseAdapter(title));
+	    modifyProjectListeners.add(modifyProjectBtnMouseAdapter());
+	    deleteProjectListeners.add(deleteProjectBtnMouseAdapter());
+	    projectBtnArray.get(numBtn).addMouseListener(entryProjectListeners.get(numBtn));
+
+	    btnPanel.revalidate();
+	    btnPanel.setPreferredSize(new Dimension(1000, 120 + 110 * numBtn));
+		numBtn++;
+		scr.revalidate();
+		scr.repaint();
+	    
+	}
+	
+	public void newCreateProject() {
+		new CreateProjectDialog(this);
+	}
+	
+	public MouseListener createProjectBtnMouseAdapter(String title) {
+		MouseListener Listener = new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				JButton sourceButton = (JButton) e.getSource();
 				long projId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];
 				accessProject(projId, title);
 			}
-		});
-		
-		btnPanel.revalidate();
-		numBtn++;
-		
-		scr.revalidate();
-        scr.repaint();
-		
-		
+		};
+		return Listener;
 	}
 	
-	
-	public void newCreateProject() {
-		new CreateProjectDialog(this);
+	public MouseListener modifyProjectBtnMouseAdapter() {
+		MouseListener Listener = new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				JButton sourceButton = (JButton) e.getSource();
+				long projectId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];
+				modifyProject(projectId);
+			}
+		};
+		return Listener;
 	}
 	
+	public MouseListener deleteProjectBtnMouseAdapter() {
+		MouseListener Listener = new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				JButton sourceButton = (JButton) e.getSource();
+				long projectId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];//////////
+				deleteProject(projectId);
+			}
+		};
+		return Listener;
+	}
 	
-	
-	public void accessProject(long projId, String title) {
+	public void accessProject(long projectId, String title) {
 		//new ProjectFrame(title, this);
 		
 		//통신 요청으로 프로젝트 접속할때 userId 확인해서 접근 권한 있는지 체크. 일단은 임시로 느낌만 만듬.
@@ -348,19 +413,85 @@ public class MainFrame extends JFrame {
 			setVisible(false);
 		}
 		*/
-		new ProjectFrame(projId,userId, title, this);
+		new ProjectFrame(projectId, title, this);
 		setVisible(false);
+	}
+	
+	public void modifyProject(long projectId) {
+		new ModifyProjectDialog(projectId, this);
+	}
+	
+	public void deleteProject(long projectId) {
+		
+		int yesOrNo = JOptionPane.showConfirmDialog(this, "Do you want to proceed?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        // 응답 처리
+        if (yesOrNo == JOptionPane.YES_OPTION) {
+        	String url = String.format("http://localhost:8080/projects/%d?userId=%d", projectId, userId);
+    		try {
+    			String response = RestClient_Delete.sendDeleteRequest(url);
+    			
+    			JSONObject jsonResponse = new JSONObject(response);
+                boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                String code = jsonResponse.getString("code");
+                String message = jsonResponse.getString("message");
+                
+                if (isSuccess && "PROJECT_2000".equals(code)) {
+                    JOptionPane.showMessageDialog(MainFrame.this, "Project Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    // 삭제 성공 시 리스트에서 제거하고 UI 업데이트
+                    int index = 0;
+                    for(int i = 0; i < projectList.size(); i++) {
+                    	if ((long)projectList.get(i)[0] == projectId) {
+                    		index = i;
+                    	}
+                    }
+                    removeButton(index);
+
+                } else {
+                    JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                }        
+    		} catch (Exception e) {
+    			JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    		}
+        }
+	}
+	
+	public void removeButton(int index) {
+		projectList.remove(index);
+		btnPanel.remove(projectBtnArray.get(index));
+		projectBtnArray.remove(index);
+		entryProjectListeners.remove(index);
+		modifyProjectListeners.remove(index);
+		deleteProjectListeners.remove(index);
+		numBtn--;
+		
+		for(int i = index-1; i >= 0; i--) {
+			Rectangle bounds = projectBtnArray.get(i).getBounds();
+			int x = bounds.x;
+            int y = bounds.y;
+            projectBtnArray.get(i).setBounds(x, y - 110, 1000, 75);
+		}
+		for(int i = index; i < numBtn; i++) {
+			projectBtnArray.get(i).setActionCommand(String.valueOf(i));
+		}
+		
+		btnPanel.revalidate();
+		btnPanel.setPreferredSize(new Dimension(1000, 120 + 110 * numBtn));
+		scr.revalidate();
+		scr.repaint();
+		
 	}
 	
 	public void addProjectArrayList(Object[] objects) {
 		projectList.add(objects);
 	}
 	//프로젝트 삭제기능
-	public void deleteProject(long projId, int index) {
+	/*
+	public void deleteProject(long projectId, int index) {
         new SwingWorker<String, Void>() {
             @Override
             protected String doInBackground() throws Exception {
-                String url = String.format("http://localhost:8080/projects/%d?userId=%d", projId, userId);
+                String url = String.format("http://localhost:8080/projects/%d?userId=%d", projectId, userId);
                 return RestClient_Delete.sendDeleteRequest(url);
             }
 
@@ -379,7 +510,7 @@ public class MainFrame extends JFrame {
                         // 삭제 성공 시 리스트에서 제거하고 UI 업데이트
                         projectList.remove(index);
                         btnPanel.removeAll();
-                        btnArray.clear();
+                        projectBtnArray.clear();
                         numBtn = 0;
                         paintProjectList();
                     } else {
@@ -392,8 +523,15 @@ public class MainFrame extends JFrame {
             }
         }.execute();
     }
+    */
 	
-	
+	public void modifyButtonTitle(long projectId, String title) {
+		for(int i = 0; i < projectList.size(); i++) {
+			if ((long)projectList.get(i)[0] == projectId) {
+				projectBtnArray.get(i).setText(title);
+			}
+		}
+	}
 	
 	public long getUserId() {
 		return userId;
