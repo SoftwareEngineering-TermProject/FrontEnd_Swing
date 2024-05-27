@@ -181,9 +181,9 @@ public class IssuePage extends JDialog {
 					tf.setBackground(ProjColor.customStaleSkyBlue);
 				}
 			}
-		});		
-		add(panel1);		
-		setVisible(true);				
+		});
+		add(panel1);	
+		setVisible(true);
 	}
 	
 }
