@@ -43,11 +43,11 @@ public class ProjColor {
 	
 	public static final Color customWindowScrollPaneGray = new Color(237, 236, 233);
 
-	public static Color customDarkRed;
-
-	public static Color clickedCustomDarkRed;
-
-	public static Color customRed;
-
-	public static Color hoverCustomRed;
+	public static final Color customDarkGreen = new Color(29, 120, 55);
+	
+	public static final Color clickedCustomDarkGreen = new Color(26, 104, 48);
+	
+	public static final Color customLightRed = new Color(228, 140, 140);
+	
+	public static final Color clickedCustomLightRed = new Color(208, 120, 120);
 }

@@ -8,9 +8,16 @@ import java.awt.*;
 public class ProjStyleButton extends JButton {
 
     int paddingWidth = 15, paddingHeight = 3;
+    private Color unClickBackground;
+    private Color clickBackground;
+    private Color foreground;
 
     public ProjStyleButton(Color unClickBackground, Color clickBackground, Color foreground, String txt) {
 
+    	this.unClickBackground = unClickBackground;
+    	this.clickBackground = clickBackground;
+    	this.foreground = foreground;
+    	
         setFont(new Font("맑은 고딕", 1, 18));
         setText(txt);
 
@@ -26,14 +33,30 @@ public class ProjStyleButton extends JButton {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) { // 누르고 있을 때
-                setBackground(clickBackground);
+            	pressedSetBack();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) { // 손 뗐을 때
-                setBackground(unClickBackground);
+            	releasedSetBack();
             }
         });
+    }
+    
+    public void setUnClickBackground(Color unClickBackground) {
+    	this.unClickBackground = unClickBackground;
+    }
+    
+	public void setClickBackground(Color clickBackground) {
+		this.clickBackground = clickBackground;
+    }
+    
+    public void pressedSetBack() {
+    	setBackground(this.clickBackground);
+    }
+    
+    public void releasedSetBack() {
+    	setBackground(this.unClickBackground);
     }
 
     @Override
