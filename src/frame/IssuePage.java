@@ -153,7 +153,7 @@ public class IssuePage extends JDialog {
 		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "Edit");
 		btn2.setFont(new Font("맑은 고딕", 1, 25));
 		panel1.add(btn2);
-		btn2.setBounds(40, 80, 55, 40);
+		btn2.setBounds(30, 80, 55, 40);
 		btn2.setPreferredSize(new Dimension(55, 40));
 		btn2.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 		
@@ -181,13 +181,9 @@ public class IssuePage extends JDialog {
 					tf.setBackground(ProjColor.customStaleSkyBlue);
 				}
 			}
-		});
-		
-		
-		
-		add(panel1);
-		
-		setVisible(true);
+		});		
+		add(panel1);		
+		setVisible(true);				
 	}
 	
 }

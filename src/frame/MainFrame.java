@@ -348,7 +348,7 @@ public class MainFrame extends JFrame {
 			setVisible(false);
 		}
 		*/
-		new ProjectFrame(projId, title, this);
+		new ProjectFrame(projId,userId, title, this);
 		setVisible(false);
 	}
 	
