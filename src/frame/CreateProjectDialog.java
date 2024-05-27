@@ -79,7 +79,7 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 				String description = ta1.getText().trim();
 				
 				if(title.equals("")) {
-					JOptionPane.showMessageDialog(CreateProjectDialog.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(CreateProjectDialog.this, "프로젝트 생성 실패: Title은 공백이 불가능합니다.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				else {
 					AddProject();
@@ -163,7 +163,6 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
                         
                         parentFrame.addNewProjectButton();
 
-                    	JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         setVisible(false);
                         dispose();  	
                     } else {
@@ -174,7 +173,12 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
-                    JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    if(e.getMessage().equals("java.net.ConnectException: Connection refused: connect")) {
+                    	JOptionPane.showMessageDialog(CreateProjectDialog.this, "프로젝트 생성 실패: 서버와 연결이 되지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else {
+                    	JOptionPane.showMessageDialog(CreateProjectDialog.this, "Create Project Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         }.execute();

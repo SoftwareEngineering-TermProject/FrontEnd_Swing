@@ -14,8 +14,12 @@ import org.json.JSONObject;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -129,9 +133,8 @@ public class MainFrame extends JFrame {
                     	JSONObject resultObject = jsonResponse.getJSONObject("result");
                         JSONArray projectsArray = resultObject.getJSONArray("projects");
                         
-                        Object[] objects = new Object[projectsArray.length()];
                         for (int i = 0; i < projectsArray.length(); i++) {
-                            JSONObject projectObject = projectsArray.getJSONObject(i);
+                            JSONObject projectObject = projectsArray.getJSONObject(projectsArray.length() -i -1);
                             long projectId = projectObject.getLong("projectId");
                             String title = projectObject.getString("title");
                             String description = projectObject.getString("description");
@@ -144,7 +147,6 @@ public class MainFrame extends JFrame {
                         
                         paintProjectList();
                         
-                    	JOptionPane.showMessageDialog(MainFrame.this, "Project list Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         
                     } else {
                         // 실패 시 오류 메시지 표시
@@ -163,7 +165,7 @@ public class MainFrame extends JFrame {
 	
 	public void paintProjectList() {
 		while(numBtn < projectList.size()) {
-			repaintButtonPanel();
+			addNewProjectButton();
 		}
 	}
 	
@@ -172,12 +174,32 @@ public class MainFrame extends JFrame {
 		//projectList.add(array);
 		
 	}
-	
+	/*
 	public void repaintButtonPanel() {
 		String title = (String)projectList.get(numBtn)[1];
 		//long projectId = (long) projectList.get(numBtn)[0];
 		
-		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
+		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
+			@Override
+		    public void paintComponent(Graphics g) {
+		        Graphics2D g2 = (Graphics2D) g;
+		        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		        Dimension dimension = getPreferredSize();
+		        int w = (int) dimension.getWidth();
+		        int h = (int) dimension.getHeight();
+
+		        g2.setColor(getBackground());
+		        g2.fillRoundRect(0, 0, w, h, 50, 50);
+
+		        g2.setColor(getForeground());
+
+		        FontMetrics fontMetrics = g2.getFontMetrics();
+		        Rectangle rectangle = fontMetrics.getStringBounds(getText(), g2).getBounds();
+
+		        g2.drawString(getText(), (w - rectangle.width) / 2, (h - rectangle.height) / 2 + fontMetrics.getAscent());
+		    }
+		};
 		tempbtn.setActionCommand(String.valueOf(numBtn));
 	    tempbtn.setBounds(31, 35 + 110 * numBtn, 700, 75); // 크기 조정
 	    tempbtn.setPreferredSize(new Dimension(700, 75));
@@ -185,7 +207,7 @@ public class MainFrame extends JFrame {
 	    btnArray.add(tempbtn);
 	    btnPanel.add(tempbtn);
 		
-/*   
+	     
 	    
 		// 삭제 버튼 생성
 	    ProjStyleButton deleteBtn = new ProjStyleButton(ProjColor.customDarkRed, ProjColor.clickedCustomDarkRed, Color.BLACK, "Delete");
@@ -231,7 +253,7 @@ public class MainFrame extends JFrame {
 	        }
 	    });
 	    
-	    */
+	    
 	    
 		btnArray.get(numBtn).addMouseListener(new MouseAdapter() {
 			@Override
@@ -249,7 +271,7 @@ public class MainFrame extends JFrame {
         scr.repaint();
         
 	}
-	
+	*/
 	public void addNewProjectButton() {
 		String title = (String)projectList.get(numBtn)[1];
 		
@@ -260,7 +282,27 @@ public class MainFrame extends JFrame {
             btnArray.get(i).setBounds(x, y + 110, 700, 75);
 		}
 		
-		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title);
+		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
+			@Override
+		    public void paintComponent(Graphics g) {
+		        Graphics2D g2 = (Graphics2D) g;
+		        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		        Dimension dimension = getPreferredSize();
+		        int w = (int) dimension.getWidth();
+		        int h = (int) dimension.getHeight();
+
+		        g2.setColor(getBackground());
+		        g2.fillRoundRect(0, 0, w, h, 50, 50);
+
+		        g2.setColor(getForeground());
+
+		        FontMetrics fontMetrics = g2.getFontMetrics();
+		        Rectangle rectangle = fontMetrics.getStringBounds(getText(), g2).getBounds();
+
+		        g2.drawString(getText(), (w - rectangle.width) / 2, (h - rectangle.height) / 2 + fontMetrics.getAscent());
+		    }
+		};
 		tempbtn.setActionCommand(String.valueOf(numBtn));
 	    tempbtn.setBounds(31, 35, 700, 75); // 크기 조정
 	    tempbtn.setPreferredSize(new Dimension(700, 75));
