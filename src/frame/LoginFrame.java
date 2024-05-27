@@ -86,7 +86,7 @@ public class LoginFrame extends JFrame{
 		
 		
 		
-		
+		/* 아이디 까먹었을때 버튼
 		ProjStyleButton btn3 = new ProjStyleButton(ProjColor.customGray, ProjColor.customGray, Color.BLACK, "Forgot your ID/password?"); // 클릭/릴리즈 시 텍스트 변하게
 		panel1.add(btn3);
 		btn3.setBounds(20, 220, 228, 23);
@@ -103,6 +103,7 @@ public class LoginFrame extends JFrame{
 				btn3.setForeground(Color.BLACK);
 			}
 		});
+		*/
 	
 		add(panel1);
 		
