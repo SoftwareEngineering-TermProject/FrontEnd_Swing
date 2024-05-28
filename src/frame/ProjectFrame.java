@@ -148,9 +148,15 @@ public class ProjectFrame extends JFrame{
 		
 		addWindowListener(new WindowAdapter() { // 1. 화면 전환에 new가 맞는가 2. x가 아니라 뒤로가기 버튼을 새로 만들어야 하나
 			public void windowClosing(WindowEvent e) {
+				/*
 				parentFrame.setVisible(true);
 				setVisible(false);
 				dispose(); // 현재 프레임만 없애기
+				*/
+				new MainFrame(userId);
+				parentFrame.dispose();
+				setVisible(false);
+				dispose();
 			}
 		});
 	}

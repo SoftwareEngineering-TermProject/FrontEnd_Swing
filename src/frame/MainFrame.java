@@ -75,7 +75,7 @@ public class MainFrame extends JFrame {
 		btnPanel.setBackground(ProjColor.customDarkGray);
 		btnPanel.setLayout(null);
 		//btnPanel.setBounds(48, 95, 1062, 680);
-		btnPanel.setPreferredSize(new Dimension(1000, 120));
+		btnPanel.setPreferredSize(new Dimension(1000, 90));
 		
 		scr = new JScrollPane(btnPanel);
 		scr.setBackground(ProjColor.customDarkGray);
@@ -309,7 +309,7 @@ public class MainFrame extends JFrame {
 			Rectangle bounds = projectBtnArray.get(i).getBounds();
 			int x = bounds.x;
             int y = bounds.y;
-            projectBtnArray.get(i).setBounds(x, y + 110, 1000, 75);
+            projectBtnArray.get(i).setBounds(x, y + 60, 1000, 40);
 		}
 		
 		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
@@ -323,7 +323,7 @@ public class MainFrame extends JFrame {
 		        int h = (int) dimension.getHeight();
 
 		        g2.setColor(getBackground());
-		        g2.fillRoundRect(0, 0, w, h, 50, 50);
+		        g2.fillRoundRect(0, 0, w, h, 30, 30);
 
 		        g2.setColor(getForeground());
 
@@ -334,8 +334,8 @@ public class MainFrame extends JFrame {
 		    }
 		};
 		tempbtn.setActionCommand(String.valueOf(numBtn));
-	    tempbtn.setBounds(31, 35, 1000, 75); // 크기 조정
-	    tempbtn.setPreferredSize(new Dimension(1000, 75));
+	    tempbtn.setBounds(31, 15, 1000, 40); // 크기 조정
+	    tempbtn.setPreferredSize(new Dimension(1000, 40));
 	    
 	    projectBtnArray.add(tempbtn);
 	    btnPanel.add(tempbtn);
@@ -346,7 +346,7 @@ public class MainFrame extends JFrame {
 	    projectBtnArray.get(numBtn).addMouseListener(entryProjectListeners.get(numBtn));
 
 	    btnPanel.revalidate();
-	    btnPanel.setPreferredSize(new Dimension(1000, 120 + 110 * numBtn));
+	    btnPanel.setPreferredSize(new Dimension(1000, 70 + 60 * numBtn));
 		numBtn++;
 		scr.revalidate();
 		scr.repaint();
@@ -462,14 +462,14 @@ public class MainFrame extends JFrame {
 			Rectangle bounds = projectBtnArray.get(i).getBounds();
 			int x = bounds.x;
             int y = bounds.y;
-            projectBtnArray.get(i).setBounds(x, y - 110, 1000, 75);
+            projectBtnArray.get(i).setBounds(x, y - 60, 1000, 40);
 		}
 		for(int i = index; i < numBtn; i++) {
 			projectBtnArray.get(i).setActionCommand(String.valueOf(i));
 		}
 		
 		btnPanel.revalidate();
-		btnPanel.setPreferredSize(new Dimension(1000, 120 + 110 * numBtn));
+		btnPanel.setPreferredSize(new Dimension(1000, 90 + 60 * numBtn));
 		scr.revalidate();
 		scr.repaint();
 		
