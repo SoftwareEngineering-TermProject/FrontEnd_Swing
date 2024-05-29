@@ -1,15 +1,16 @@
 package style;
 
+import javax.swing.JScrollBar;
+
 import java.awt.Color;
 import java.awt.Dimension;
-import javax.swing.JScrollBar;
 
 public class ProjStyleScrollBar extends JScrollBar {
 
-    public ProjStyleScrollBar() {
+    public ProjStyleScrollBar(Color bar, Color track) {
         setUI(new ProjStyleScrollBarUI());
         setPreferredSize(new Dimension(8, 8));
-        setForeground(ProjColor.tableHeaderGray);
-        setBackground(ProjColor.customGray);
+        setForeground(bar);
+        setBackground(track);
     }
 }

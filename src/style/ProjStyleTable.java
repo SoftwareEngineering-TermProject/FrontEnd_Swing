@@ -1,11 +1,5 @@
 package style;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.util.HashMap;
-import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,7 +7,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.DropMode;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProjStyleTable extends JTable {
 
@@ -48,7 +49,7 @@ public class ProjStyleTable extends JTable {
     }
 	
     public void fixTable(JScrollPane scroll) {
-        scroll.setVerticalScrollBar(new ProjStyleScrollBar());
+        scroll.setVerticalScrollBar(new ProjStyleScrollBar(ProjColor.tableHeaderGray, ProjColor.customGray));
         JPanel panel = new JPanel();
         panel.setBackground(ProjColor.customGray);
         scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, panel);

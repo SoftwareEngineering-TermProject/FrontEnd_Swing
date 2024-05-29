@@ -1,8 +1,9 @@
 package style;
 
-import java.awt.*;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+
+import java.awt.*;
 
 public class ProjStyleComboBoxUI extends BasicComboBoxUI {
 	

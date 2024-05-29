@@ -1,32 +1,43 @@
 package frame;
 
+import javax.swing.*;
+
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import java.util.Timer;
+import java.util.ArrayList;
+import java.util.TimerTask;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import style.ProjStyleComboBox;
 import style.ProjColor;
 import style.ProjStyleButton;
-import style.ProjStyleComboBoxUI;
 import style.ProjStyleScrollBar;
 
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.Color;
-import java.awt.Dimension;
-import javax.swing.*;
+import util.RestClient_Get;
 
 public class IssuePage extends JDialog {
 	
-	String[] tester; // 요청 받아와서 tester 배열 생성.
-	String[] dev; // 요청 받아와서 dev 배열 생성
-	String[] priority = {"None", "critical", "major", "high", "medium", "low", "trivial"};
-	String[] status = {"new", "assigned", "fixed", "investigating", "closed"};
+	private String[] tester; // 요청 받아와서 tester 배열 생성.
+	private String[] dev; // 요청 받아와서 dev 배열 생성
+	private String[] priority = {"None", "critical", "major", "high", "medium", "low", "trivial"};
+	private String[] status = {"new", "assigned", "fixed", "investigating", "closed"};
+	private JTextArea tempTa;
+	private JPanel tempPanel;
+	private long userId;
+	private long issueId;
+	private CommentPanel commentPanel;
 	
-	public IssuePage () {
-		setSize(600,700);
+	public IssuePage (long userId, long issueId) {
+		
+		this.userId = userId;
+		this.issueId = issueId;
+		
+		setSize(1000,700);
 		setLocationRelativeTo(null);
 		setModal(true);
 		setUndecorated(true);
@@ -143,7 +154,7 @@ public class IssuePage extends JDialog {
 		ta.setBorder(null);
 		
 		JScrollPane scrollPane = new JScrollPane(ta);
-		scrollPane.setVerticalScrollBar(new ProjStyleScrollBar());
+		scrollPane.setVerticalScrollBar(new ProjStyleScrollBar(ProjColor.tableHeaderGray, ProjColor.customGray));
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // 수평 스크롤바 비활성화
         panel1.add(scrollPane);
         scrollPane.setBounds(30, 185, 540, 245);
@@ -182,8 +193,79 @@ public class IssuePage extends JDialog {
 				}
 			}
 		});
+		
+		commentPanel = new CommentPanel(400, 700, userId, issueId);
+		add(commentPanel);
+		commentPanel.setBounds(600, 0, 400, 700);
+		
+		// 오류나면 안에 있는 함수만 쓰자.
+		Timer timer = new Timer();
+		
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				getIssueDetailFromServer();
+			}
+		};
+
+		timer.schedule(task, 0, 1000);
+		
 		add(panel1);	
 		setVisible(true);
+
+	}
+	
+	public void getIssueDetailFromServer() {
+		String urlString = String.format("http://localhost:8080/issues/%d", issueId);
+		try {
+			String response = RestClient_Get.sendGetRequest(urlString);
+			JSONObject jsonResponse = new JSONObject(response);
+	        boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+	        String code = jsonResponse.getString("code");
+
+	        if (isSuccess && "ISSUE_3000".equals(code)) {
+	            JSONObject issueObject = jsonResponse.getJSONObject("result");
+	            
+	            String title = issueObject.getString("title");
+	            String reporter = issueObject.getJSONObject("user").getString("userName");
+	            String fixer = issueObject.isNull("fixer") ? "None" : issueObject.getString("fixer");
+	            String assignee = issueObject.isNull("assignee") ? "None" : issueObject.getString("assignee");
+	            String priority = issueObject.getString("issuePriority");
+	            String status = issueObject.getString("issueStatus");
+	            String date = issueObject.getString("createAt").split("T")[0];
+	            
+	            JSONArray issueComments = issueObject.getJSONArray("comments");
+	            
+	            ArrayList<Object[]> commentList = new ArrayList<>();
+	            
+	            for (int i = 0; i < issueComments.length(); i++) {
+	                JSONObject commentObject = issueComments.getJSONObject(i);
+	                JSONObject writerObject = commentObject.getJSONObject("user");
+	                
+	                long commentId = commentObject.getLong("commentId");
+	                
+	                String writer = writerObject.getString("userName");
+
+	                String creationDate = commentObject.getString("createdAt").split("T")[0] + " " + commentObject.getString("createdAt").split("T")[1].split("\\.")[0];
+	                
+	                String comment = commentObject.getString("content");
+	                
+	                Object[] array = {commentId, writer, creationDate, comment};
+	                
+	                commentList.add(array);
+
+	            }
+	            commentPanel.getComment(commentList);
+	            
+	        } else {
+	            String message = jsonResponse.getString("message");
+	            JOptionPane.showMessageDialog(IssuePage.this, "1이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "2이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		
 	}
 	
 }
+

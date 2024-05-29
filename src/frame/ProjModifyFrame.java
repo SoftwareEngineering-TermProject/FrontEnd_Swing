@@ -1,28 +1,31 @@
 package frame;
 
-import style.ProjColor;
-import style.ProjStyleButton;
-import util.RestClient_Patch;
 import javax.swing.*;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import java.util.concurrent.ExecutionException;
+
 import org.json.JSONObject;
+
+import style.ProjColor;
+import style.ProjStyleButton;
+
+import util.RestClient_Patch;
 
 public class ProjModifyFrame extends JDialog {
 	 	private JTextField tf1;
 	    private JTextArea ta1;
 	    private long projectId;
 	    private long userId;
-	    private MainFrame mainFrame;
 	    
-	    public ProjModifyFrame(long projectId, String currentTitle, String currentDescription, long userId, MainFrame mainFrame) {
+	    public ProjModifyFrame(long projectId, String currentTitle, String currentDescription, long userId) {
 	        this.projectId = projectId;
 	        this.userId = userId;
-	        this.mainFrame = mainFrame;
 	        setTitle("Modify Project");
 	        setSize(560, 480);
 	        setLocationRelativeTo(null); // 화면 중앙 위치

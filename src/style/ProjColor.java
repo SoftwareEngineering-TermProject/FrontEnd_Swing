@@ -50,4 +50,12 @@ public class ProjColor {
 	public static final Color customLightRed = new Color(228, 140, 140);
 	
 	public static final Color clickedCustomLightRed = new Color(208, 120, 120);
+	
+	public static final Color customCommentBackgroundSkyblue = new Color(186, 206, 224);
+	
+	public static final Color customCommentBarSkyblue = new Color(149, 165, 179);
+	
+	public static final Color customSendButtonYellow = new Color(254, 229, 0);
+	
+	public static final Color clickedCustomSendButtonYellow = new Color(242, 208, 15);
 }

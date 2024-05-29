@@ -1,14 +1,6 @@
 package frame;
 
-import style.ProjColor;
-import style.ProjStyleButton;
-import style.ProjStyleScrollBar;
-import util.RestClient_Get;
-import util.RestClient_Delete;
 import javax.swing.*;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,37 +13,48 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import style.ProjColor;
+import style.ProjStyleButton;
+import style.ProjStyleScrollBar;
+
+import util.RestClient_Get;
+import util.RestClient_Delete;
 
 public class MainFrame extends JFrame {
-	private ArrayList<Object[]> projectList = new ArrayList<>();
+	private ArrayList<Object[]> projectList;
 	private ArrayList<ProjStyleButton> projectBtnArray;
-	private JPanel btnPanel;
-	private JScrollPane scr;
-	private int numBtn = 0;
-	private static long userId;
-	private boolean modifyMode;
-	private boolean deleteMode;
 	private ArrayList<MouseListener> entryProjectListeners;
 	private ArrayList<MouseListener> modifyProjectListeners;
 	private ArrayList<MouseListener> deleteProjectListeners;
+	private JPanel btnPanel;
+	private JScrollPane scr;
+	private long userId;
+	private int numBtn;
+	private boolean modifyMode;
+	private boolean deleteMode;
 	
 	private ArrayList<Long> accessibleId; // 이것도 임시.
 	
 	//생성자
-	public MainFrame(long userId) {	
+	public MainFrame(long userId) {
+		
+		projectList = new ArrayList<>();
 		projectBtnArray = new ArrayList<>();
-		this.userId = userId;
-		modifyMode = false;
-		deleteMode = false;
 		entryProjectListeners = new ArrayList<>();
 		modifyProjectListeners = new ArrayList<>();
 		deleteProjectListeners = new ArrayList<>();
-		
-		readProjectList(); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
+		this.userId = userId;
+		numBtn = 0;
+		modifyMode = false;
+		deleteMode = false;
+		////////////////////////////
 		
 		accessibleId = new ArrayList<>();
 		accessibleId.add(userId);
@@ -82,7 +85,7 @@ public class MainFrame extends JFrame {
 		scr.setBorder(null);
 		panel1.add(scr);
 		scr.setBounds(48, 95, 1062, 680);
-		scr.setVerticalScrollBar(new ProjStyleScrollBar());
+		scr.setVerticalScrollBar(new ProjStyleScrollBar(ProjColor.tableHeaderGray, ProjColor.customGray));
 		scr.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scr.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
@@ -91,6 +94,8 @@ public class MainFrame extends JFrame {
 		lbl1.setFont(new Font(null, Font.PLAIN, 50)); // 폰트, 굵게, 크기
 		panel1.add(lbl1);
 		lbl1.setBounds(20,1,400,80);
+		
+		readProjectList(); // 나중에 project에 속한 username 생기면 그걸로 바꾸기. 지금은 일단 모든 project 가져옴.
 		
 		ProjStyleButton btn4 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "modify");
 		panel1.add(btn4);
@@ -236,73 +241,50 @@ public class MainFrame extends JFrame {
 		setVisible(true);		
 	}
 	
-	public void readProjectList() {
+	// project List 읽어오기
+	private void readProjectList() {
+		try {
+			String encodedUserId = URLEncoder.encode(userId + "", "UTF-8");
+			String urlString = "http://localhost:8080/projects/projectList/" + encodedUserId;
 
-        new SwingWorker<String, Void>() {
-            @Override
-            protected String doInBackground() throws Exception {
-            	
-                String urlString = "http://localhost:8080/projects";
-
-                return RestClient_Get.sendGetRequest(urlString); //
-            	
-            }
-            @Override
-            protected void done() {
-                try {
-                    String response = get();
-                    System.out.println("Response from project server: " + response);
+			String response = RestClient_Get.sendGetRequest(urlString);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+			boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            
+            if (isSuccess && "PROJECT_2000".equals(code)) {
+            	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                JSONArray projectsArray = resultObject.getJSONArray("projects");
+                
+                for (int i = 0; i < projectsArray.length(); i++) {
+                    JSONObject projectObject = projectsArray.getJSONObject(i);
+                    long projectId = projectObject.getLong("projectId");
+                    String title = projectObject.getString("title");
+                    String userRole = projectObject.getString("userRole");
                     
-                    JSONObject jsonResponse = new JSONObject(response);
-                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
-                    String code = jsonResponse.getString("code");
-                    
-                    if (isSuccess && "PROJECT_2000".equals(code)) {
-                    	JSONObject resultObject = jsonResponse.getJSONObject("result");
-                        JSONArray projectsArray = resultObject.getJSONArray("projects");
-                        
-                        for (int i = 0; i < projectsArray.length(); i++) {
-                            JSONObject projectObject = projectsArray.getJSONObject(projectsArray.length() -i -1);
-                            long projectId = projectObject.getLong("projectId");
-                            String title = projectObject.getString("title");
-                            String description = projectObject.getString("description");
-                            
-                            Object[] array = {projectId, title, description};
+                    Object[] array = {projectId, title, userRole};
 
-                            projectList.add(array);
+                    projectList.add(array);
 
-                        }
-                        
-                        paintProjectList();
-                        
-                        
-                    } else {
-                        // 실패 시 오류 메시지 표시
-                        String message = jsonResponse.getString("message");
-                        JOptionPane.showMessageDialog(MainFrame.this, "Searching failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-
-                    
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(MainFrame.this, "Searching Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+
+                while(numBtn < projectList.size()) {
+        			addProjectButton();
+        		}
+                
+            } else {
+                // 실패 시 오류 메시지 표시
+                String message = jsonResponse.getString("message");
+                JOptionPane.showMessageDialog(MainFrame.this, "Searching failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }.execute();
-	}
-	
-	public void paintProjectList() {
-		while(numBtn < projectList.size()) {
-			addNewProjectButton();
 		}
+		catch (Exception e) {
+            JOptionPane.showMessageDialog(MainFrame.this, "Searching Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
 	}
 	
-	public void addProjectList(String title, String description) {
-		//Object[] array = {projectId, title, description};
-		//projectList.add(array);
-	}
-	
-	public void addNewProjectButton() {
+	public void addProjectButton() {
 		String title = (String)projectList.get(numBtn)[1];
 		
 		for(int i = 0; i < projectBtnArray.size(); i++) {
@@ -311,6 +293,10 @@ public class MainFrame extends JFrame {
             int y = bounds.y;
             projectBtnArray.get(i).setBounds(x, y + 60, 1000, 40);
 		}
+		
+		entryProjectListeners.add(createProjectBtnMouseAdapter(title));
+	    modifyProjectListeners.add(modifyProjectBtnMouseAdapter());
+	    deleteProjectListeners.add(deleteProjectBtnMouseAdapter());
 		
 		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
 			@Override
@@ -334,16 +320,12 @@ public class MainFrame extends JFrame {
 		    }
 		};
 		tempbtn.setActionCommand(String.valueOf(numBtn));
-	    tempbtn.setBounds(31, 15, 1000, 40); // 크기 조정
-	    tempbtn.setPreferredSize(new Dimension(1000, 40));
-	    
+	    tempbtn.setBounds(31, 15, 1000, 40);
+	    tempbtn.setPreferredSize(new Dimension(1000, 40));  
+	    tempbtn.addMouseListener(entryProjectListeners.get(numBtn));
 	    projectBtnArray.add(tempbtn);
-	    btnPanel.add(tempbtn);
 	    
-	    entryProjectListeners.add(createProjectBtnMouseAdapter(title));
-	    modifyProjectListeners.add(modifyProjectBtnMouseAdapter());
-	    deleteProjectListeners.add(deleteProjectBtnMouseAdapter());
-	    projectBtnArray.get(numBtn).addMouseListener(entryProjectListeners.get(numBtn));
+	    btnPanel.add(tempbtn);
 
 	    btnPanel.revalidate();
 	    btnPanel.setPreferredSize(new Dimension(1000, 70 + 60 * numBtn));
@@ -386,7 +368,7 @@ public class MainFrame extends JFrame {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				JButton sourceButton = (JButton) e.getSource();
-				long projectId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];//////////
+				long projectId = (long) projectList.get(Integer.parseInt(sourceButton.getActionCommand()))[0];
 				deleteProject(projectId);
 			}
 		};
@@ -406,7 +388,13 @@ public class MainFrame extends JFrame {
 			setVisible(false);
 		}
 		*/
-		new ProjectFrame(projectId,userId, title, this);
+		String userRole = null;
+		for(int i = 0; i < projectList.size(); i++) {
+			if ((long)projectList.get(i)[0] == projectId) {
+				userRole = (String)projectList.get(i)[2];
+			}
+		}
+		new ProjectFrame(projectId, userId, userRole, title, this);
 		setVisible(false);
 	}
 	
@@ -478,46 +466,7 @@ public class MainFrame extends JFrame {
 	public void addProjectArrayList(Object[] objects) {
 		projectList.add(objects);
 	}
-	//프로젝트 삭제기능
-	/*
-	public void deleteProject(long projectId, int index) {
-        new SwingWorker<String, Void>() {
-            @Override
-            protected String doInBackground() throws Exception {
-                String url = String.format("http://localhost:8080/projects/%d?userId=%d", projectId, userId);
-                return RestClient_Delete.sendDeleteRequest(url);
-            }
 
-            @Override
-            protected void done() {
-                try {
-                    String response = get();
-                    System.out.println("Response from server: " + response);
-                    JSONObject jsonResponse = new JSONObject(response);
-                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
-                    String message = jsonResponse.getString("message");
-                    String code = jsonResponse.getString("code");
-
-                    if (isSuccess && "PROJECT_2000".equals(code)) {
-                        JOptionPane.showMessageDialog(MainFrame.this, "Project Deleted Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                        // 삭제 성공 시 리스트에서 제거하고 UI 업데이트
-                        projectList.remove(index);
-                        btnPanel.removeAll();
-                        projectBtnArray.clear();
-                        numBtn = 0;
-                        paintProjectList();
-                    } else {
-                        JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        }.execute();
-    }
-    */
-	
 	public void modifyButtonTitle(long projectId, String title) {
 		for(int i = 0; i < projectList.size(); i++) {
 			if ((long)projectList.get(i)[0] == projectId) {

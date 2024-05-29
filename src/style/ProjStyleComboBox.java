@@ -1,8 +1,9 @@
 package style;
 
+import javax.swing.*;
+
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.*;
 
 public class ProjStyleComboBox extends JComboBox {
 	

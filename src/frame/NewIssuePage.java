@@ -1,7 +1,7 @@
 package frame;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import javax.swing.*;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -9,22 +9,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import util.RestClient;
-import util.RestClient_Get;
-import javax.swing.*;
 
 import java.util.concurrent.ExecutionException;
 
-import style.ProjColor;
-import style.ProjStyleButton;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import style.ProjColor;
+import style.ProjStyleButton;
+import style.ProjStyleComboBox;
+import util.RestClient;
+import util.RestClient_Get;
+
 public class NewIssuePage extends JDialog {
 	
 	private ProjectFrame parentFrame;
 	private String userName;
 	private JTextField tf1;
 	private JTextArea ta1;
+	private ProjStyleComboBox cbPriority;
 	private long projectId;
     private long userId;
     
@@ -33,9 +36,9 @@ public class NewIssuePage extends JDialog {
 		this.parentFrame= parentFrame;
 		this.projectId = projectId;
         this.userId = userId;
-		userName = getUsernameByUserId(userId);
+		userName = getUserNameByUserId(userId);
 	
-		setSize(560, 480);
+		setSize(560, 530);
 		setLocationRelativeTo(null); // 화면 중앙 위치
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setModal(true);
@@ -57,10 +60,15 @@ public class NewIssuePage extends JDialog {
 		panel1.add(lbl2);
 		lbl2.setBounds(35, 55, 400, 80);
 		
+		JLabel lbltemp = new JLabel("priority : ");
+		lbltemp.setFont(new Font(null, Font.PLAIN, 15));
+		panel1.add(lbltemp);
+		lbltemp.setBounds(35, 158, 400, 80);
+		
 		JLabel lbl3 = new JLabel("description");
 		lbl3.setFont(new Font(null, Font.PLAIN, 15));
 		panel1.add(lbl3);
-		lbl3.setBounds(35, 158, 400, 80);
+		lbl3.setBounds(35, 198, 400, 80);
 		
 		tf1 = new JTextField();
 		tf1.setBackground(ProjColor.customDarkGray);
@@ -69,15 +77,21 @@ public class NewIssuePage extends JDialog {
 		panel1.add(tf1);
 		tf1.setBounds(37, 116, 465, 56);
 		
+		cbPriority = new ProjStyleComboBox(new String[]{"BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL"});
+		cbPriority.setBackground(ProjColor.customDarkGray);
+		cbPriority.setBounds(100, 188, 165, 25);
+		cbPriority.setSelectedIndex(2);
+        panel1.add(cbPriority);
+		
 		ta1 = new JTextArea();
 		ta1.setBackground(ProjColor.customDarkGray);
 		ta1.setFont(new Font("맑은 고딕", Font.PLAIN, 15));
 		panel1.add(ta1);
-		ta1.setBounds(37, 216, 465, 150);
+		ta1.setBounds(37, 256, 465, 150);
 		
 		ProjStyleButton btn1 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "Add");
 		panel1.add(btn1);
-		btn1.setBounds(108, 380, 111, 56);
+		btn1.setBounds(108, 430, 111, 56);
 		btn1.setPreferredSize(new Dimension(111, 56));
 		
 		btn1.addMouseListener(new MouseAdapter() {
@@ -89,7 +103,7 @@ public class NewIssuePage extends JDialog {
 		
 		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customWhiteRed, ProjColor.clickedCustomWhiteRed, Color.BLACK, "Cancel");
 		panel1.add(btn2);
-		btn2.setBounds(325, 380, 111, 56);
+		btn2.setBounds(325, 430, 111, 56);
 		btn2.setPreferredSize(new Dimension(111, 56));
 
 		btn2.addMouseListener(new MouseAdapter() {
@@ -125,12 +139,13 @@ public class NewIssuePage extends JDialog {
 	public void addIssueRow() {
 		String title = tf1.getText().trim();
 		String description = ta1.getText().trim();
+		String priority = (String)cbPriority.getSelectedItem();
 
 		if (title.equals("")) {
 			JOptionPane.showMessageDialog(NewIssuePage.this, "Title cannot have empty spaces", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		else {
-			sendIssueRequest(projectId, title, description, userId);
+			sendIssueRequest(projectId, title, description, priority, userId);
 			setVisible(false);
 			dispose();
 			
@@ -138,8 +153,8 @@ public class NewIssuePage extends JDialog {
 	}
 	
     
-    private void sendIssueRequest(long projectId, String title, String description, long userId) {
-        String jsonInputString = String.format("{\"projectId\":%d, \"title\":\"%s\", \"description\":\"%s\", \"issuePriority\":\"MAJOR\"}", projectId, title, description);
+    private void sendIssueRequest(long projectId, String title, String description, String priority, long userId) {
+        String jsonInputString = String.format("{\"projectId\":%d, \"title\":\"%s\", \"description\":\"%s\", \"issuePriority\":\"%s\"}", projectId, title, description, priority);
 
         new SwingWorker<String, Void>() {
             @Override
@@ -157,15 +172,10 @@ public class NewIssuePage extends JDialog {
                     boolean isSuccess = jsonResponse.getBoolean("isSuccess");
                     String message = jsonResponse.getString("message");
                     String code = jsonResponse.getString("code");
-                    
-            		LocalDate now = LocalDate.now();
-            		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd");
-            		String formatedNow = now.format(formatter);
-                    
 
                     if (isSuccess && "ISSUE_3000".equals(code)) {
-                    	parentFrame.addIssue(title, userName, "None", "None", "MAJOR", "NEW", formatedNow);
-                        parentFrame.addModel();
+                    	parentFrame.getIssuesFromServer("");
+                    	
                         JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Created Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         setVisible(false);
                         dispose();
@@ -181,7 +191,7 @@ public class NewIssuePage extends JDialog {
     }	
 	
     //userId로 userName 받아오는 코드. 
-    private String getUsernameByUserId(long userId) {
+    private String getUserNameByUserId(long userId) {
         String url = String.format("http://localhost:8080/users");
 
         try {
