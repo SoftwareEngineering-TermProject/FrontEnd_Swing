@@ -1,25 +1,23 @@
 package frame;
 
-import style.ProjColor;
-import style.ProjStyleButton;
-import util.RestClient;
-import util.RestClient_Get;
-import util.RestClient_Patch;
-
 import javax.swing.*;
-
-import org.json.JSONObject;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+
 import java.util.concurrent.ExecutionException;
+
+import java.net.URLEncoder;
+
+import org.json.JSONObject;
+
+import style.ProjColor;
+import style.ProjStyleButton;
+
+import util.RestClient_Get;
+import util.RestClient_Patch;
 
 public class ModifyProjectDialog extends JDialog { // Modal 창 만들기 위해
 	

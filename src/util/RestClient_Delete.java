@@ -2,6 +2,7 @@ package util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -24,10 +25,6 @@ public class RestClient_Delete {
             return response.toString();
         } else {
             throw new RuntimeException("Failed : HTTP error code : " + responseCode);
-    }
-}
-	
-	
-	
-	
+        }
+	}	
 }

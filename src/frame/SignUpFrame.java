@@ -1,23 +1,25 @@
 package frame;
 
-import style.ProjColor;
-import style.ProjStyleButton;
-import util.RestClient;
+import javax.swing.*;
 
 import java.awt.Color;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Dimension;
-import javax.swing.*;
+
 import java.util.concurrent.ExecutionException;
+
 import org.json.JSONObject;
+
+import style.ProjColor;
+import style.ProjStyleButton;
+
+import util.RestClient;
 
 class SignUpFrame extends JDialog {
     private JTextField tfName;
     private JTextField tfUserName;
     private JPasswordField pfPassword;
-    //private JComboBox<String> cbUserRole;
 
     public SignUpFrame() {
         setTitle("Sign Up");
@@ -60,17 +62,6 @@ class SignUpFrame extends JDialog {
         pfPassword.setBorder(null);
         panel.add(pfPassword);
         
-        //제거
-        /*
-        JLabel lblUserRole = new JLabel("User Role:");
-        lblUserRole.setBounds(50, 140, 80, 25);
-        panel.add(lblUserRole);
-
-        cbUserRole = new JComboBox<>(new String[]{"ADMIN", "PL", "DEV", "TESTER"});
-        cbUserRole.setBounds(150, 140, 165, 25);
-        panel.add(cbUserRole);
-		*/
-        
         ProjStyleButton btnSubmit = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "Submit");
         btnSubmit.setBounds(180, 180, 100, 30);
         btnSubmit.setPreferredSize(new Dimension(100, 30));
@@ -91,9 +82,7 @@ class SignUpFrame extends JDialog {
         String name = tfName.getText();
         String userName = tfUserName.getText();
         String password = new String(pfPassword.getPassword());
-        String userRole = "DEV"; // 제거해야함.
         
-        //{"userName":"ymca", "password":"1234", "name":"jaemin"}
         String jsonInputString = String.format("{\"userName\":\"%s\", \"password\":\"%s\", \"name\":\"%s\"}", userName, password, name);
         System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
 
