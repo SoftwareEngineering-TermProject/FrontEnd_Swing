@@ -20,8 +20,12 @@ public class LogInFrame extends JFrame{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private String url;
 
 	public LogInFrame() {
+		
+		url = InputUrlPage.getUrl();
+		
 		setTitle("Log in");
 		setSize(570, 400);
 		setLocationRelativeTo(null);
@@ -87,7 +91,7 @@ public class LogInFrame extends JFrame{
 	}
     
     private void logIn(String userName, String password) {
-        String urlString = "http://localhost:8080/users/sign_in";
+        String urlString = url + "users/sign_in";
         String jsonInputString = String.format("{\"userName\":\"%s\", \"password\":\"%s\"}", userName, password);
         
         try {
@@ -120,14 +124,10 @@ public class LogInFrame extends JFrame{
             	JOptionPane.showMessageDialog(LogInFrame.this, "접속 실패: 아이디 또는 비밀번호가 일치하지 않습니다.", "Error", JOptionPane.ERROR_MESSAGE);
             }
             else {
-            	JOptionPane.showMessageDialog(LogInFrame.this, "접속 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            	if(e.getMessage().startsWith("no protocol")) {
+            		JOptionPane.showMessageDialog(LogInFrame.this, "접속 실패: 주소 " + url + "을(를) 찾을 수 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+            	}
             }
         }
     }
-	
-	public static void main(String[] args) {
-		
-		new LogInFrame();
-		
-	}
 }

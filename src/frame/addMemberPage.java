@@ -32,11 +32,13 @@ class AddMemberPage extends JDialog {
     private ProjStyleComboBox cbUserRole;
     private ArrayList<Object[]> Member;
     private JPanel panel;
+    private String url;
 
     public AddMemberPage(ProjectFrame parentFrame) {
     	
     	this.parentFrame = parentFrame;
     	Member = new ArrayList<>();
+    	url = InputUrlPage.getUrl();
     	
         setTitle("Add Member");
         setSize(400, 230);
@@ -96,7 +98,7 @@ class AddMemberPage extends JDialog {
             @Override
             protected String doInBackground() throws Exception {
             	
-                String urlString = "http://localhost:8080/users";
+                String urlString = url + "users";
 
                 return RestClient_Get.sendGetRequest(urlString);
             	
@@ -151,7 +153,7 @@ class AddMemberPage extends JDialog {
             protected String doInBackground() throws Exception {
             	
             	String encodedProjectId = URLEncoder.encode(Long.toString(parentFrame.getProjectId()), "UTF-8");
-                String urlString = "http://localhost:8080/projects/participants/" + encodedProjectId;
+                String urlString = url + "projects/participants/" + encodedProjectId;
 
                 return RestClient_Get.sendGetRequest(urlString);
             	

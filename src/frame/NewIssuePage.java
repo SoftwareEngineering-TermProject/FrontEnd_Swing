@@ -33,13 +33,14 @@ public class NewIssuePage extends JDialog {
 	private ProjStyleComboBox cbPriority;
 	private long projectId;
     private long userId;
+    private String url;
     
 	public NewIssuePage(ProjectFrame parentFrame, long projectId, long userId) {
 		
 		this.parentFrame= parentFrame;
 		this.projectId = projectId;
         this.userId = userId;
-		getUserNameByUserId(userId);
+		url = InputUrlPage.getUrl();
 	
 		setSize(560, 530);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -157,12 +158,12 @@ public class NewIssuePage extends JDialog {
 	
     
     private void sendIssueRequest(long projectId, String title, String description, String priority, long userId) {
-        String jsonInputString = String.format("{\"projectId\":%d, \"title\":\"%s\", \"description\":\"%s\", \"issuePriority\":\"%s\"}", projectId, title, description, priority);
+        String url = this.url + String.format("issues/?userId=%d", userId);
+    	String jsonInputString = String.format("{\"projectId\":%d, \"title\":\"%s\", \"description\":\"%s\", \"issuePriority\":\"%s\"}", projectId, title, description, priority);
 
         new SwingWorker<String, Void>() {
             @Override
             protected String doInBackground() throws Exception {
-                String url = String.format("http://localhost:8080/issues/?userId=%d", userId);
                 return RestClient.sendPostRequest(url, jsonInputString);
             }
 
@@ -185,45 +186,17 @@ public class NewIssuePage extends JDialog {
                     } else {
                         JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Creation Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Creation Failed: 이슈생성 권한이 없습니다. " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                } catch (Exception e) {
+                	if (e.getMessage().equals("java.lang.RuntimeException: Failed : HTTP error code : 400")) {
+                        JOptionPane.showMessageDialog(NewIssuePage.this, "이슈 생성 불가: 권한이 없습니다. ", "Error", JOptionPane.ERROR_MESSAGE);
+                	}
+                	else {
+                		
+                	}
                 }
             }
         }.execute();
-    }	
-	
-    //userId로 userName 받아오는 코드. 
-    private String getUserNameByUserId(long userId) {
-        String url = String.format("http://localhost:8080/users");
-
-        try {
-            String response = RestClient_Get.sendGetRequest(url);
-            System.out.println("Response from server: " + response);
-
-            JSONObject jsonResponse = new JSONObject(response);
-            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
-            String code = jsonResponse.getString("code");
-            
-            if (isSuccess && "USER_1000".equals(code)) {
-                JSONObject resultObject = jsonResponse.getJSONObject("result");
-                JSONArray usersArray = resultObject.getJSONArray("users");
-                for (int i = 0; i < usersArray.length(); i++) {
-                    JSONObject user = usersArray.getJSONObject(i);
-                    if (user.getLong("userId") == userId) {
-                        return user.getString("userName");
-                    }
-                }
-                throw new RuntimeException("User ID not found");
-            } else {
-                throw new RuntimeException("Failed to get username: " + jsonResponse.getString("message"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error occurred while fetching username", e);
-        }
     }
-    
 }
 
 	

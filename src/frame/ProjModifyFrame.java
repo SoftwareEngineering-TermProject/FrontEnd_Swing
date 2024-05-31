@@ -26,10 +26,13 @@ public class ProjModifyFrame extends JDialog {
 	    private JTextArea ta1;
 	    private long projectId;
 	    private long userId;
+	    private String url;
 	    
 	    public ProjModifyFrame(long projectId, String currentTitle, String currentDescription, long userId) {
 	        this.projectId = projectId;
 	        this.userId = userId;
+	        url = InputUrlPage.getUrl();
+
 	        setTitle("Modify Project");
 	        setSize(560, 480);
 	        setLocationRelativeTo(null); // 화면 중앙 위치
@@ -90,40 +93,29 @@ public class ProjModifyFrame extends JDialog {
 	        String title = tf1.getText();
 	        String description = ta1.getText();
 	        
+	        String url = this.url + String.format("projects/%d?userId=%d", projectId, userId);
 	        String jsonInputString = String.format("{\"title\":\"%s\", \"description\":\"%s\"}", title, description);
 	        System.out.println("Sending JSON: " + jsonInputString);  // JSON 데이터 출력
-
-	        new SwingWorker<String, Void>() {
-	            @Override
-	            protected String doInBackground() throws Exception {
-	                String url = String.format("http://localhost:8080/projects/%d?userId=%d", projectId, userId);
-	                return RestClient_Patch.sendPatchRequest(url, jsonInputString);
-	            }
-
-	            @Override
-	            protected void done() {
-	                try {
-	                    String response = get();
-	                    System.out.println("Response from server: " + response);
-	                    JSONObject jsonResponse = new JSONObject(response);
-	                    boolean isSuccess = jsonResponse.getBoolean("isSuccess");
-	                    String message = jsonResponse.getString("message");
-	                    String code = jsonResponse.getString("code");
-	                    
-	                    if (isSuccess && "PROJECT_2000".equals(code)) {
-	                        JOptionPane.showMessageDialog(ProjModifyFrame.this, "Project Modified Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-	                        
-	                        setVisible(false);
-	                        dispose();
-	                    } else {
-	                        JOptionPane.showMessageDialog(ProjModifyFrame.this, "Project Modification Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
-	                    }
-	                } catch (InterruptedException | ExecutionException e) {
-	                    e.printStackTrace();
-	                    JOptionPane.showMessageDialog(ProjModifyFrame.this, "Project Modification Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-	                }
-	            }
-	        }.execute();
+	        
+	        try {
+	        	String response = RestClient_Patch.sendPatchRequest(url, jsonInputString);
+	        	JSONObject jsonResponse = new JSONObject(response);
+                boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+                String message = jsonResponse.getString("message");
+                String code = jsonResponse.getString("code");
+                
+                if (isSuccess && "PROJECT_2000".equals(code)) {
+                    JOptionPane.showMessageDialog(ProjModifyFrame.this, "Project Modified Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    
+                    setVisible(false);
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(ProjModifyFrame.this, "Project Modification Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                }
+	        }
+	        catch (Exception e) {
+	        	JOptionPane.showMessageDialog(ProjModifyFrame.this, "Project Modification Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+	        }
 	    }
 	
 	
