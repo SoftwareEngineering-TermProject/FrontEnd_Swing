@@ -146,7 +146,7 @@ public class ProjectFrame extends JFrame{
         		int row = table.rowAtPoint(e.getPoint());
         		
         		long issueId = (long)issueList.get(row);
-        		new IssuePage(userId, issueId);
+        		callIssuePage(userId, issueId);
         	}
         });
         
@@ -174,6 +174,10 @@ public class ProjectFrame extends JFrame{
 				dispose();
 			}
 		});
+	}
+	
+	public void callIssuePage(long userId, long issueId) {
+		new IssuePage(userId, issueId, this);
 	}
 	
 	public void callAddIssue() {
@@ -236,6 +240,7 @@ public class ProjectFrame extends JFrame{
 	                    JSONObject issuesArray = jsonResponse.getJSONObject("result");
 	                    JSONArray projectsArray = issuesArray.getJSONArray("issues");
                         
+	                    issueList.clear();
 	                    for (int i = 0; i < projectsArray.length(); i++) {
 	                        JSONObject issueObject = projectsArray.getJSONObject(i);
 	                        long issueId = issueObject.getLong("issueId");

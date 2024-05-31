@@ -74,6 +74,7 @@ public class CommentPanel extends JPanel {
         add(scr, BorderLayout.CENTER);
         
         JPanel sendTextPanel = new JPanel();
+        sendTextPanel.setBackground(ProjColor.customSendButtonYellow);
         sendTextPanel.setLayout(new BorderLayout());
         
         JTextArea sendTa = new JTextArea();
@@ -98,8 +99,10 @@ public class CommentPanel extends JPanel {
             }
         });
         
+        
         // 텍스트 영역 추가를 위한 버튼 생성
-        ProjStyleButton addButton = new ProjStyleButton(ProjColor.clickedCustomSendButtonYellow, ProjColor.clickedCustomSendButtonYellow, Color.BLACK, "send");
+        ProjStyleButton addButton = new ProjStyleButton(ProjColor.customSendButtonYellow, ProjColor.clickedCustomSendButtonYellow, Color.BLACK, "send");
+        
         sendTextPanel.add(addButton, BorderLayout.EAST);
         
         add(sendTextPanel, BorderLayout.SOUTH);
@@ -125,7 +128,8 @@ public class CommentPanel extends JPanel {
     				getComment(commentList);
                 }
 			}
-        }); 
+        });
+         
 	}
 	
 	public void addComment(String text) {
