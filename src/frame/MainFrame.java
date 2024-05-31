@@ -15,8 +15,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -28,6 +26,10 @@ import util.RestClient_Get;
 import util.RestClient_Delete;
 
 public class MainFrame extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ArrayList<Object[]> projectList;
 	private ArrayList<ProjStyleButton> projectBtnArray;
 	private ArrayList<MouseListener> entryProjectListeners;
@@ -299,6 +301,11 @@ public class MainFrame extends JFrame {
 	    deleteProjectListeners.add(deleteProjectBtnMouseAdapter());
 		
 		ProjStyleButton tempbtn = new ProjStyleButton(ProjColor.customDarkSkyblue, ProjColor.clickedCustomDarkSkyblue, Color.BLACK, title) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 		    public void paintComponent(Graphics g) {
 		        Graphics2D g2 = (Graphics2D) g;

@@ -18,7 +18,11 @@ import java.util.Map;
 
 public class ProjStyleTable extends JTable {
 
-    private TableDarkHeader header;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private TableDarkHeader header;
     private TableDarkCell cell;
 
     public ProjStyleTable() {
@@ -60,7 +64,11 @@ public class ProjStyleTable extends JTable {
     private class TableDarkHeader extends DefaultTableCellRenderer {
 
     	
-        private Map<Integer, Integer> alignment = new HashMap<>();
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private Map<Integer, Integer> alignment = new HashMap<>();
 
         public void setAlignment(int column, int align) {
             alignment.put(column, align);
@@ -85,7 +93,11 @@ public class ProjStyleTable extends JTable {
 
     private class TableDarkCell extends DefaultTableCellRenderer {
     	
-        private Map<Integer, Integer> alignment = new HashMap<>();
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private Map<Integer, Integer> alignment = new HashMap<>();
 
         public void setAlignment(int column, int align) {
             alignment.put(column, align);

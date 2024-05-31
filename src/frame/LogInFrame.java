@@ -3,18 +3,10 @@ package frame;
 import javax.swing.*;
 
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Dimension;
-import java.awt.FocusTraversalPolicy;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-
-import java.util.concurrent.ExecutionException;
-
 import org.json.JSONObject;
 
 import style.ProjColor;
@@ -24,7 +16,12 @@ import util.RestClient;
 
 public class LogInFrame extends JFrame{
 
-    public LogInFrame() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public LogInFrame() {
 		setTitle("Log in");
 		setSize(570, 400);
 		setLocationRelativeTo(null);

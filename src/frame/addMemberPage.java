@@ -22,6 +22,11 @@ import style.ProjStyleComboBox;
 import util.RestClient_Get;
 
 class AddMemberPage extends JDialog {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ProjectFrame parentFrame;
     private ProjStyleComboBox cbUserName;
     private ProjStyleComboBox cbUserRole;

@@ -18,7 +18,12 @@ public class ProjStyleComboBoxUI extends BasicComboBoxUI {
 	@Override
     protected JButton createArrowButton() {
         return new JButton() {
-            @Override
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
             public int getWidth() {
                 return 0;
             }

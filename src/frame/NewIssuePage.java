@@ -23,8 +23,11 @@ import util.RestClient_Get;
 
 public class NewIssuePage extends JDialog {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ProjectFrame parentFrame;
-	private String userName;
 	private JTextField tf1;
 	private JTextArea ta1;
 	private ProjStyleComboBox cbPriority;
@@ -36,7 +39,7 @@ public class NewIssuePage extends JDialog {
 		this.parentFrame= parentFrame;
 		this.projectId = projectId;
         this.userId = userId;
-		userName = getUserNameByUserId(userId);
+		getUserNameByUserId(userId);
 	
 		setSize(560, 530);
 		setLocationRelativeTo(null); // 화면 중앙 위치

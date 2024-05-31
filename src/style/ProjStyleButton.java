@@ -7,18 +7,18 @@ import java.awt.*;
 
 public class ProjStyleButton extends JButton {
 
-    int paddingWidth = 15, paddingHeight = 3;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	int paddingWidth = 15, paddingHeight = 3;
     private Color unClickBackground;
     private Color clickBackground;
-    private Color foreground;
-
     public ProjStyleButton(Color unClickBackground, Color clickBackground, Color foreground, String txt) {
 
     	this.unClickBackground = unClickBackground;
     	this.clickBackground = clickBackground;
-    	this.foreground = foreground;
-    	
-        setFont(new Font("맑은 고딕", 1, 18));
+    	setFont(new Font("맑은 고딕", 1, 18));
         setText(txt);
 
         Dimension dimension = getPreferredSize();

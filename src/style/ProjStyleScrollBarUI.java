@@ -92,7 +92,12 @@ public class ProjStyleScrollBarUI extends BasicScrollBarUI {
 
     private class ScrollBarButton extends JButton { // up, down button out of sight
 
-        public ScrollBarButton() {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public ScrollBarButton() {
             setBorder(BorderFactory.createEmptyBorder());
         }
         
