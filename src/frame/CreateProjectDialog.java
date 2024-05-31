@@ -20,6 +20,10 @@ import util.RestClient;
 
 public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private MainFrame parentFrame;
 	private JTextField tf1;
 	private JTextArea ta1;
@@ -75,8 +79,6 @@ public class CreateProjectDialog extends JDialog { // Modal 창 만들기 위해
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				String title = tf1.getText().trim();
-				String description = ta1.getText().trim();
-				
 				if(title.equals("")) {
 					JOptionPane.showMessageDialog(CreateProjectDialog.this, "프로젝트 생성 실패: Title은 공백이 불가능합니다.", "Error", JOptionPane.ERROR_MESSAGE);
 				}

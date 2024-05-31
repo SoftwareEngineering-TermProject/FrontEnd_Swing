@@ -4,7 +4,7 @@ import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -30,6 +30,10 @@ import util.RestClient_Get;
 
 public class CommentPanel extends JPanel {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel insetPanel;
 	private long userId;
 	private long issueId;
@@ -189,7 +193,11 @@ public class CommentPanel extends JPanel {
 	        textAreaAndTitlePanel.add(commentName, BorderLayout.NORTH);
 	        
 	        JPanel textAreaPanel = new JPanel() {
-	            private int arc = 10; // 둥근 테두리의 반지름
+	            /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+				private int arc = 10; // 둥근 테두리의 반지름
 	
 	            @Override
 	            protected void paintComponent(Graphics g) {

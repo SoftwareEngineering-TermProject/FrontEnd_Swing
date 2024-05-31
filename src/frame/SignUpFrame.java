@@ -17,7 +17,11 @@ import style.ProjStyleButton;
 import util.RestClient;
 
 class SignUpFrame extends JDialog {
-    private JTextField tfName;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JTextField tfName;
     private JTextField tfUserName;
     private JPasswordField pfPassword;
 

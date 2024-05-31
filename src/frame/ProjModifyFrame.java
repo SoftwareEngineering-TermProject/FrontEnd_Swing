@@ -18,7 +18,11 @@ import style.ProjStyleButton;
 import util.RestClient_Patch;
 
 public class ProjModifyFrame extends JDialog {
-	 	private JTextField tf1;
+	 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+		private JTextField tf1;
 	    private JTextArea ta1;
 	    private long projectId;
 	    private long userId;

@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.*;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -25,21 +24,19 @@ import util.RestClient_Get;
 
 public class ProjectFrame extends JFrame{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private DefaultTableModel model;
 	private ArrayList<Long> issueList;
-	private int issueNum;
 	private long projectId;
 	private long userId;
-	private String userRole;
-	
 	public ProjectFrame(long projectId, long userId, String userRole, String title, MainFrame parentFrame) {
 		
 		issueList = new ArrayList<>();
-		issueNum = 0;
 		this.projectId = projectId;
 		this.userId = userId;
-		this.userRole = userRole;
-		
 		setTitle(title);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -119,7 +116,12 @@ public class ProjectFrame extends JFrame{
 		    	"ID", "Issue title", "Reporter", "Fixer", "Assignee", "Priority", "Status", "Date"
 		    }
 		) {
-		    public boolean isCellEditable(int rowIndex, int columnIndex) {
+		    /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
 		    	return false;
 		    }
 		});

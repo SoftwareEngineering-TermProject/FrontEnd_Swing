@@ -21,6 +21,10 @@ import util.RestClient_Patch;
 
 public class ModifyProjectDialog extends JDialog { // Modal 창 만들기 위해
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private MainFrame parentFrame;
 	private JTextField tf1;
 	private JTextArea ta1;

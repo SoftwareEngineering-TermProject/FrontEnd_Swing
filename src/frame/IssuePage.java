@@ -5,10 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Timer;
 import java.util.ArrayList;
-import java.util.TimerTask;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -23,6 +20,10 @@ import util.RestClient_Patch;
 
 public class IssuePage extends JDialog {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTextField titleTextField;
 	private String title;
 	private JTextArea descriptionTextArea;
@@ -44,7 +45,6 @@ public class IssuePage extends JDialog {
 	private long issueId;
 	private CommentPanel commentPanel;
 	private boolean edit;
-	private boolean isFixed;
 	private ProjStyleButton fixerButton;
 	private ProjectFrame parentFrame;
 	private String userRole;
@@ -441,10 +441,8 @@ public class IssuePage extends JDialog {
 	            this.priorityComboBox.setSelectedItem(priority);
 	            this.statusLabel.setText(status);
 	            if(status.equals("NEW") || status.equals("ASSIGNED") || status.equals("REOPENED")) {
-	            	isFixed = false;
 	            }
 	            else {
-	            	isFixed = true;
 	            }
 	            
 	            if(status.equals("CLOSED")) {
@@ -507,6 +505,7 @@ public class IssuePage extends JDialog {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void getAssigneeMember() {
 		
 		try {

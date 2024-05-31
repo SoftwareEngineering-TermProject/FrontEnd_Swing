@@ -5,8 +5,13 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Font;
 
+@SuppressWarnings("rawtypes")
 public class ProjStyleComboBox extends JComboBox {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Color back;
 	private Color fore;
 	private Color disabledBack;
@@ -34,6 +39,7 @@ public class ProjStyleComboBox extends JComboBox {
 		StringSetModel(items);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void StringSetModel(String[] items) {
 		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
 		int numItems = items.length;
