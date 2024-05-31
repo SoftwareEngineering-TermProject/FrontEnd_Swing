@@ -174,7 +174,7 @@ public class NewIssuePage extends JDialog {
                     String code = jsonResponse.getString("code");
 
                     if (isSuccess && "ISSUE_3000".equals(code)) {
-                    	parentFrame.getIssuesFromServer("");
+                    	parentFrame.getIssuesFromServer(""); /////////////
                     	
                         JOptionPane.showMessageDialog(NewIssuePage.this, "Issue Created Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                         setVisible(false);

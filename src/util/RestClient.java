@@ -35,4 +35,33 @@ public class RestClient {
             throw new RuntimeException("Failed : HTTP error code : " + responseCode);
         }
     }
+    
+    public static String sendPostRequest(String urlStr) throws Exception {
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json; utf-8");
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setDoOutput(true);
+
+        // JSON 데이터 없이 POST 요청을 보냄
+        try (OutputStream os = conn.getOutputStream()) {
+            byte[] input = "{}".getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        int responseCode = conn.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+            StringBuilder response = new StringBuilder();
+            String responseLine;
+            while ((responseLine = in.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+            in.close();
+            return response.toString();
+        } else {
+            throw new RuntimeException("Failed : HTTP error code : " + responseCode);
+        }
+    }
 }

@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.util.Timer;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -17,202 +16,399 @@ import style.ProjStyleComboBox;
 import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleScrollBar;
-
+import util.RestClient;
+import util.RestClient_Delete;
 import util.RestClient_Get;
+import util.RestClient_Patch;
 
 public class IssuePage extends JDialog {
 	
-	private String[] tester; // 요청 받아와서 tester 배열 생성.
-	private String[] dev; // 요청 받아와서 dev 배열 생성
-	private String[] priority = {"None", "critical", "major", "high", "medium", "low", "trivial"};
-	private String[] status = {"new", "assigned", "fixed", "investigating", "closed"};
-	private JTextArea tempTa;
-	private JPanel tempPanel;
+	private JTextField titleTextField;
+	private String title;
+	private JTextArea descriptionTextArea;
+	private String description;
+	private JLabel dateLabel;
+	private String date;
+	private JLabel reporterLabel;
+	private String reporter;
+	private ProjStyleComboBox assigneeComboBox;
+	private String assignee;
+	private ArrayList<Object[]> assigneeMember;
+	private JLabel fixerLabel;
+	private String fixer;
+	private ProjStyleComboBox priorityComboBox;
+	private String priority;
+	private JLabel statusLabel;
+	private String status;
 	private long userId;
 	private long issueId;
 	private CommentPanel commentPanel;
+	private boolean edit;
+	private boolean isFixed;
+	private ProjStyleButton fixerButton;
+	private ProjectFrame parentFrame;
+	private String userRole;
+	private boolean isClosed;
 	
-	public IssuePage (long userId, long issueId) {
+	public IssuePage (long userId, long issueId, ProjectFrame parentFrame) {
 		
+		this.title = "";
+		this.description = "";
+		this.date = "";
 		this.userId = userId;
 		this.issueId = issueId;
+		edit = false;
+		assigneeMember = new ArrayList<>();
+		this.parentFrame = parentFrame;
+		userRole = getUserRoleByUserId(userId);
 		
 		setSize(1000,700);
 		setLocationRelativeTo(null);
 		setModal(true);
 		setUndecorated(true);
 		
-		JPanel panel1 = new JPanel();
-		panel1.setLayout(null);
-		panel1.setBackground(Color.WHITE);
-		panel1.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		JPanel mainPanel = new JPanel();
+		mainPanel.setLayout(null);
+		mainPanel.setBackground(Color.WHITE);
+		mainPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 		
-		ProjStyleButton btn1 = new ProjStyleButton(Color.WHITE, Color.WHITE, Color.BLACK, "X");
-		btn1.setFont(new Font(null, Font.PLAIN, 50));
-		panel1.add(btn1);
-		btn1.setBounds(550, 20, 30, 35);
-		btn1.setPreferredSize(new Dimension(30, 35));
+		ProjStyleButton closeButton = new ProjStyleButton(Color.WHITE, Color.WHITE, Color.BLACK, "X");
+		closeButton.setFont(new Font(null, Font.PLAIN, 50));
+		closeButton.setBounds(550, 20, 30, 35);
+		closeButton.setPreferredSize(new Dimension(30, 35));
 		
-		btn1.addMouseListener(new MouseAdapter() {
+		closeButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				parentFrame.getIssuesFromServer("");
 				setVisible(false);
 				dispose();
 			}
 		});
+		mainPanel.add(closeButton);
 		
-		JLabel lbl1 = new JLabel("Issue title");
-		lbl1.setFont(new Font(null, Font.BOLD, 40));
-		panel1.add(lbl1);
-		lbl1.setBounds(10, 20, 190, 40);
-		lbl1.setPreferredSize(new Dimension(190, 40));
+		titleTextField = new JTextField();
+		titleTextField.setEnabled(false);
+		titleTextField.setFont(new Font(null, Font.BOLD, 40));
+		titleTextField.setBorder(null);
+		titleTextField.setBounds(10, 20, 540, 40);
+		titleTextField.setPreferredSize(new Dimension(540, 40));
+		mainPanel.add(titleTextField);
 		
-		JLabel lbl2 = new JLabel("Reporter");
-		lbl2.setFont(new Font(null, Font.BOLD, 18));
-		panel1.add(lbl2);
-		lbl2.setBounds(30, 440, 100, 25);
-		lbl2.setPreferredSize(new Dimension(100, 25));
+		dateLabel = new JLabel();
+		dateLabel.setBackground(Color.WHITE);
+		dateLabel.setFont(new Font(null, Font.BOLD, 18));
+		dateLabel.setBounds(30, 150, 100, 25);
+		dateLabel.setPreferredSize(new Dimension(100, 25));
+		dateLabel.setBorder(null);
+		mainPanel.add(dateLabel);
 		
-		JLabel lbl3 = new JLabel("Fixer");
-		lbl3.setFont(new Font(null, Font.BOLD, 18));
-		panel1.add(lbl3);
-		lbl3.setBounds(30, 480, 100, 25);
-		lbl3.setPreferredSize(new Dimension(100, 25));
+		descriptionTextArea = new JTextArea();
+		descriptionTextArea.setFont(new Font("맑은 고딕", 1, 15));
+		descriptionTextArea.setText(description);
+		descriptionTextArea.setLineWrap(true);
+		descriptionTextArea.setWrapStyleWord(true);
+		descriptionTextArea.setEditable(false);
+		descriptionTextArea.setBorder(null);
 		
-		JLabel lbl4 = new JLabel("Assignee");
-		lbl4.setFont(new Font(null, Font.BOLD, 18));
-		panel1.add(lbl4);
-		lbl4.setBounds(30, 520, 100, 25);
-		lbl4.setPreferredSize(new Dimension(100, 25));
-		
-		JLabel lbl5 = new JLabel("Priority");
-		lbl5.setFont(new Font(null, Font.BOLD, 18));
-		panel1.add(lbl5);
-		lbl5.setBounds(30, 560, 100, 25);
-		lbl5.setPreferredSize(new Dimension(100, 25));
-		
-		JLabel lbl6 = new JLabel("Status");
-		lbl6.setFont(new Font(null, Font.BOLD, 18));
-		panel1.add(lbl6);
-		lbl6.setBounds(30, 600, 100, 25);
-		lbl6.setPreferredSize(new Dimension(100, 25));
-		
-		JTextField tf = new JTextField("00-00-00");
-		tf.setBackground(Color.WHITE);
-		tf.setFont(new Font(null, Font.BOLD, 18));
-		tf.setEditable(false);
-		panel1.add(tf);
-		tf.setBounds(30, 150, 100, 25);
-		tf.setPreferredSize(new Dimension(100, 25));
-		tf.setBorder(null);
-		
-		String[] tester = {"tester1", "tester2", "tester3", "tester4"};
-		String[] dev = {"dev1", "dev2", "dev3", "dev4"};
-		String[] priority = {"critical", "major", "high", "medium", "low", "trivial"};
-		String[] status = {"new", "assigned", "fixed", "investigating", "closed"};
-		
-		ProjStyleComboBox cb1 = new ProjStyleComboBox(tester);
-		cb1.setEnabled(false);
-		panel1.add(cb1);
-		cb1.setBounds(150, 440, 100, 25);
-		cb1.setPreferredSize(new Dimension(100, 25));
-		
-		ProjStyleComboBox cb2 = new ProjStyleComboBox(dev);
-		cb2.setEnabled(false);
-		panel1.add(cb2);
-		cb2.setBounds(150, 480, 100, 25);
-		cb2.setPreferredSize(new Dimension(100, 25));
-		
-		ProjStyleComboBox cb3 = new ProjStyleComboBox(dev);
-		cb3.getEditor().getEditorComponent().setBackground(Color.red);
-		cb3.setEnabled(false);
-		panel1.add(cb3);
-		cb3.setBounds(150, 520, 100, 25);
-		cb3.setPreferredSize(new Dimension(100, 25));
-		
-		ProjStyleComboBox cb4 = new ProjStyleComboBox(priority);
-		cb4.setEnabled(false);
-		panel1.add(cb4);
-		cb4.setBounds(150, 560, 100, 25);
-		cb4.setPreferredSize(new Dimension(100, 25));
-		
-		ProjStyleComboBox cb5 = new ProjStyleComboBox(status);
-		cb5.setEnabled(false);
-		panel1.add(cb5);
-		cb5.setBounds(150, 600, 100, 25);
-		cb5.setPreferredSize(new Dimension(100, 25));
-		
-		
-		
-		
-		JTextArea ta = new JTextArea();
-		ta.setFont(new Font("맑은 고딕", 1, 15));
-		ta.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-		ta.setLineWrap(true);
-        ta.setWrapStyleWord(true);
-		ta.setEditable(false);
-		ta.setBorder(null);
-		
-		JScrollPane scrollPane = new JScrollPane(ta);
+		JScrollPane scrollPane = new JScrollPane(descriptionTextArea);
 		scrollPane.setVerticalScrollBar(new ProjStyleScrollBar(ProjColor.tableHeaderGray, ProjColor.customGray));
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // 수평 스크롤바 비활성화
-        panel1.add(scrollPane);
         scrollPane.setBounds(30, 185, 540, 245);
         scrollPane.setPreferredSize(new Dimension(540, 245));
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
+        mainPanel.add(scrollPane);
+        
+        ProjStyleButton editButton = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "Edit");
+		editButton.setFont(new Font("맑은 고딕", 1, 25));
+		editButton.setBounds(30, 80, 55, 40);
+		editButton.setPreferredSize(new Dimension(55, 40));
+		editButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 		
-		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "Edit");
-		btn2.setFont(new Font("맑은 고딕", 1, 25));
-		panel1.add(btn2);
-		btn2.setBounds(30, 80, 55, 40);
-		btn2.setPreferredSize(new Dimension(55, 40));
-		btn2.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-		
-		btn2.addMouseListener(new MouseAdapter() {
+		editButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if(tf.isEditable()) {
-					tf.setEditable(false);
-					ta.setEditable(false);
-					cb1.setEnabled(false);
-					cb2.setEnabled(false);
-					cb3.setEnabled(false);
-					cb4.setEnabled(false);
-					cb5.setEnabled(false);
-					tf.setBackground(Color.WHITE);
-				}
-				else {
-					tf.setEditable(true);
-					ta.setEditable(true);
-					cb1.setEnabled(true);
-					cb2.setEnabled(true);
-					cb3.setEnabled(true);
-					cb4.setEnabled(true);
-					cb5.setEnabled(true);
-					tf.setBackground(ProjColor.customStaleSkyBlue);
+				if(isClosed == false) {
+					edit = !edit;
+					if(edit) {
+						titleTextField.setEnabled(true);
+						descriptionTextArea.setEditable(true);
+					}
+					else {
+						titleTextField.setEnabled(false);
+						descriptionTextArea.setEditable(false);
+						String modifiedTitle = titleTextField.getText();
+						String modifiedDescription = descriptionTextArea.getText();
+						modifyIssue(modifiedTitle, modifiedDescription);
+					}
 				}
 			}
 		});
+		mainPanel.add(editButton);
 		
+		JLabel reporterTextLabel = new JLabel("Reporter");
+		reporterTextLabel.setFont(new Font(null, Font.BOLD, 18));
+		reporterTextLabel.setBounds(30, 440, 100, 25);
+		reporterTextLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(reporterTextLabel);
+		
+		reporterLabel = new JLabel();
+		reporterLabel.setFont(new Font(null, Font.BOLD, 18));
+		reporterLabel.setBounds(150, 440, 100, 25);
+		reporterLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(reporterLabel);
+		
+		JLabel assigneeTextLabel = new JLabel("Assignee");
+		assigneeTextLabel.setFont(new Font(null, Font.BOLD, 18));
+		assigneeTextLabel.setBounds(30, 480, 100, 25);
+		assigneeTextLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(assigneeTextLabel);
+		
+		String[] none = {"None"};
+		assigneeComboBox = new ProjStyleComboBox(none);
+		assigneeComboBox.getEditor().getEditorComponent().setBackground(Color.red); //?
+		assigneeComboBox.setBounds(150, 480, 100, 25);
+		assigneeComboBox.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(assigneeComboBox);
+		
+		ProjStyleButton assignButton = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "assign");
+		assignButton.setFont(new Font("맑은 고딕", 1, 18));
+		assignButton.setBounds(270, 480, 80, 25);
+		assignButton.setPreferredSize(new Dimension(80, 25));
+		assignButton.setBorder(null);
+		
+		assignButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if(isClosed == false) {
+					String assignedUserName = (String)assigneeComboBox.getSelectedItem();
+					assignMember(assignedUserName);
+				}
+			}
+		});
+		mainPanel.add(assignButton);
+		
+		JLabel fixerTextLabel = new JLabel("Fixer");
+		fixerTextLabel.setFont(new Font(null, Font.BOLD, 18));
+		fixerTextLabel.setBounds(30, 520, 100, 25);
+		fixerTextLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(fixerTextLabel);
+		
+		fixerLabel = new JLabel();
+		fixerLabel.setFont(new Font(null, Font.BOLD, 18));
+		fixerLabel.setBounds(150, 520, 100, 25);
+		fixerLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(fixerLabel);
+
+		fixerButton = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "fix");
+		fixerButton.setFont(new Font("맑은 고딕", 1, 18));
+		fixerButton.setBounds(270, 520, 80, 25);
+		fixerButton.setPreferredSize(new Dimension(80, 25));
+		fixerButton.setBorder(null);
+		
+		fixerButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if(isClosed == false) {
+					String userName = getUserNameByUserId(userId);
+					if(userName.equals(assignee)) {
+						if(status.equals("NEW") || status.equals("ASSIGNED") || status.equals("REOPENED")) {
+							fixIssue();
+						}
+						else {
+							JOptionPane.showMessageDialog(IssuePage.this, "fix 실패: fix 불가능한 상태입니다.", "Error", JOptionPane.ERROR_MESSAGE);
+						}
+					}
+					else {
+						JOptionPane.showMessageDialog(IssuePage.this, "fix 실패: 담당자가 아닙니다.", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+		});
+		mainPanel.add(fixerButton);
+		
+		JLabel priorityTextLabel = new JLabel("Priority");
+		priorityTextLabel.setFont(new Font(null, Font.BOLD, 18));
+		priorityTextLabel.setBounds(30, 560, 100, 25);
+		priorityTextLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(priorityTextLabel);
+		
+		String[] priorityList = {"BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL"};
+		priorityComboBox = new ProjStyleComboBox(priorityList);
+		priorityComboBox.setBounds(150, 560, 100, 25);
+		priorityComboBox.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(priorityComboBox);
+		
+		ProjStyleButton prioritySaveButton = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "save");
+		prioritySaveButton.setFont(new Font("맑은 고딕", 1, 18));
+		prioritySaveButton.setBounds(270, 560, 80, 25);
+		prioritySaveButton.setPreferredSize(new Dimension(80, 25));
+		prioritySaveButton.setBorder(null);
+		
+		prioritySaveButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if(isClosed == false) {
+					if(userRole.equals("PL") || userRole.equals("ADMIN")) {
+						changePriorityNStatus();
+					}
+					else {
+						JOptionPane.showMessageDialog(IssuePage.this, "priority 수정 실패: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+		});
+		mainPanel.add(prioritySaveButton);
+		
+		JLabel statusTextLabel = new JLabel("Status");
+		statusTextLabel.setFont(new Font(null, Font.BOLD, 18));
+		statusTextLabel.setBounds(30, 600, 100, 25);
+		statusTextLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(statusTextLabel);
+		
+		statusLabel = new JLabel();
+		statusLabel.setFont(new Font(null, Font.BOLD, 18));
+		statusLabel.setBounds(150, 600, 100, 25);
+		statusLabel.setPreferredSize(new Dimension(100, 25));
+		mainPanel.add(statusLabel);
+		
+		ProjStyleButton statusOpenCloseButton = new ProjStyleButton(ProjColor.customGray, ProjColor.clickedCustomGray, Color.BLACK, "");
+		statusOpenCloseButton.setFont(new Font("맑은 고딕", 1, 18));
+		statusOpenCloseButton.setBounds(270, 600, 80, 25);
+		statusOpenCloseButton.setPreferredSize(new Dimension(80, 25));
+		statusOpenCloseButton.setBorder(null);
+		
+		statusOpenCloseButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if(userRole.equals("PL") || userRole.equals("ADMIN")) {
+					if(status.equals("CLOSED")) {
+						statusOpenCloseButton.setText("close");
+						isClosed = false;
+						status = "REOPENED";
+						statusLabel.setText(status);
+						changePriorityNStatus();
+						deleteAssignee();
+						assigneeComboBox.setSelectedItem("None");
+						deleteFixer();
+						fixerLabel.setText("None");
+					}
+					else {
+						statusOpenCloseButton.setText("reopen");
+						isClosed = true;
+						status = "CLOSED";
+						statusLabel.setText(status);
+						changePriorityNStatus();
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(IssuePage.this, "status 변경 실패: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+		mainPanel.add(statusOpenCloseButton);
+
 		commentPanel = new CommentPanel(400, 700, userId, issueId);
-		add(commentPanel);
 		commentPanel.setBounds(600, 0, 400, 700);
+		add(commentPanel);
+		
+		getIssueDetailFromServer();
+		
+		if(status.equals("CLOSED")) {
+			statusOpenCloseButton.setText("reopen");
+			
+		}
+		else {
+			statusOpenCloseButton.setText("close");
+		}
+		
+		getIssueComment();
+
+		getAssigneeMember();
 		
 		// 오류나면 안에 있는 함수만 쓰자.
+		/*
 		Timer timer = new Timer();
 		
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				getIssueDetailFromServer();
+				getIssueComment();
 			}
 		};
 
 		timer.schedule(task, 0, 1000);
+		*/ // 추가로 바꾸자. 자꾸 업데이트하니깐 껏다키는거 불편함
 		
-		add(panel1);	
+		add(mainPanel);	
 		setVisible(true);
 
+	}
+	
+	public void deleteAssignee () {
+		String url = String.format("http://localhost:8080/issues/issues/assignee/%s?userId=%s", issueId, userId);
+		try {
+			String response = RestClient_Delete.sendDeleteRequest(url);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            String message = jsonResponse.getString("message");
+            
+            if (isSuccess && "ISSUE_3000".equals(code)) {
+
+            } else {
+                JOptionPane.showMessageDialog(IssuePage.this, "Project Deletion Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+            }        
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "Project Deletion Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void deleteFixer () {
+		String url = String.format("http://localhost:8080/issues/issues/fixer/%s?userId=%s", issueId, userId);
+		try {
+			String response = RestClient_Delete.sendDeleteRequest(url);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            String message = jsonResponse.getString("message");
+            
+            if (isSuccess && "ISSUE_3000".equals(code)) {
+
+            } else {
+                JOptionPane.showMessageDialog(IssuePage.this, "Project Deletion Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+            }        
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "Project Deletion Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void modifyIssue(String modifiedTitle, String modifiedDescription) {
+		String urlString = String.format("http://localhost:8080/issues/%s?userId=%s", issueId, userId);
+		String jsonInputString = String.format("{\"title\":\"%s\", \"description\":\"%s\"}", modifiedTitle, modifiedDescription);
+		try {
+			String response = RestClient_Patch.sendPatchRequest(urlString, jsonInputString);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+	        boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+	        String code = jsonResponse.getString("code");
+	        
+	        if (isSuccess && "ISSUE_3000".equals(code)) {
+	        	JSONObject resultObject = jsonResponse.getJSONObject("result");
+	            String modifyingTitle = resultObject.getString("title");
+	            String modifyingDescription = resultObject.getString("description");
+	            titleTextField.setText(modifyingTitle);
+	            descriptionTextArea.setText(modifyingDescription);
+	        }  else {
+	        	String message = jsonResponse.getString("message");
+	            JOptionPane.showMessageDialog(IssuePage.this, "1이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "2이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	public void getIssueDetailFromServer() {
@@ -226,14 +422,58 @@ public class IssuePage extends JDialog {
 	        if (isSuccess && "ISSUE_3000".equals(code)) {
 	            JSONObject issueObject = jsonResponse.getJSONObject("result");
 	            
-	            String title = issueObject.getString("title");
-	            String reporter = issueObject.getJSONObject("user").getString("userName");
-	            String fixer = issueObject.isNull("fixer") ? "None" : issueObject.getString("fixer");
-	            String assignee = issueObject.isNull("assignee") ? "None" : issueObject.getString("assignee");
-	            String priority = issueObject.getString("issuePriority");
-	            String status = issueObject.getString("issueStatus");
-	            String date = issueObject.getString("createAt").split("T")[0];
+	            this.title = issueObject.getString("title");
+	            this.description = issueObject.getString("description");
+	            this.date = issueObject.getString("createAt").split("T")[0];
+	            this.reporter = issueObject.getJSONObject("user").getString("userName");
+	            this.fixer = issueObject.isNull("fixer") ? "None" : issueObject.getString("fixer");
+	            this.assignee = issueObject.isNull("assignee") ? "None" : issueObject.getString("assignee");
+	            this.priority = issueObject.getString("issuePriority");
+	            this.status = issueObject.getString("issueStatus");
 	            
+	            
+	            this.titleTextField.setText(title);
+	            this.descriptionTextArea.setText(description);
+	            this.dateLabel.setText(date);
+	            this.reporterLabel.setText(reporter);
+	            this.fixerLabel.setText(fixer);
+	            //this.assigneeComboBox ;;
+	            this.priorityComboBox.setSelectedItem(priority);
+	            this.statusLabel.setText(status);
+	            if(status.equals("NEW") || status.equals("ASSIGNED") || status.equals("REOPENED")) {
+	            	isFixed = false;
+	            }
+	            else {
+	            	isFixed = true;
+	            }
+	            
+	            if(status.equals("CLOSED")) {
+	            	isClosed = true;
+	            }
+	            else {
+	            	isClosed = false;
+	            }
+	            
+	        } else {
+	            String message = jsonResponse.getString("message");
+	            JOptionPane.showMessageDialog(IssuePage.this, "1이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "2이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		
+	}
+	
+	public void getIssueComment() {
+		String urlString = String.format("http://localhost:8080/issues/%s", issueId);
+		try {
+			String response = RestClient_Get.sendGetRequest(urlString);
+			JSONObject jsonResponse = new JSONObject(response);
+	        boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+	        String code = jsonResponse.getString("code");
+
+	        if (isSuccess && "ISSUE_3000".equals(code)) {
+	            JSONObject issueObject = jsonResponse.getJSONObject("result");
 	            JSONArray issueComments = issueObject.getJSONArray("comments");
 	            
 	            ArrayList<Object[]> commentList = new ArrayList<>();
@@ -267,5 +507,217 @@ public class IssuePage extends JDialog {
 		
 	}
 	
+	public void getAssigneeMember() {
+		
+		try {
+			String urlString = "http://localhost:8080/users";
+			String response = RestClient_Get.sendGetRequest(urlString);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            
+            if (isSuccess && "USER_1000".equals(code)) {
+            	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                JSONArray projectsArray = resultObject.getJSONArray("users");
+                
+                assigneeMember.clear();
+                for (int i = 0; i < projectsArray.length(); i++) {
+                    JSONObject projectObject = projectsArray.getJSONObject(i);
+                    long userId = projectObject.getLong("userId");
+                    String userName = projectObject.getString("userName");
+
+                    
+                    Object[] array = {userId, userName};
+                    
+
+                    assigneeMember.add(array);
+
+                }
+                
+                assigneeComboBox.removeAllItems();
+                String none = "None";
+                assigneeComboBox.addItem(none);
+                for(int i = 0; i < assigneeMember.size(); i++) {
+                	assigneeComboBox.addItem((String)assigneeMember.get(i)[1]);
+                }
+                assigneeComboBox.setSelectedItem(assignee);
+
+                repaint(); //
+
+            } else {
+                // 실패 시 오류 메시지 표시
+                String message = jsonResponse.getString("message");
+                JOptionPane.showMessageDialog(IssuePage.this, "Searching failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+            }
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "Searching Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void assignMember(String assignedUserName) {
+		if(assignedUserName.equals("None")) {
+			JOptionPane.showMessageDialog(IssuePage.this, "할당 실패 : None은 할당할 수 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		try {
+			String urlString = String.format("http://localhost:8080/issues/assignee/%s?userId=%s", issueId, userId);
+			String jsonInputString = String.format("{\"userName\":\"%s\"}", assignedUserName);
+  
+	        String response = RestClient.sendPostRequest(urlString, jsonInputString);
+	        
+	        JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            
+            if (isSuccess && "ISSUE_3000".equals(code)) {
+            	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                assignee = resultObject.getString("userName");
+                status = "ASSIGNED";
+                statusLabel.setText("ASSIGNED");
+                changePriorityNStatus();
+                getAssigneeMember();
+            } else {
+                // 실패 시 오류 메시지 표시
+                String message = jsonResponse.getString("message");
+                JOptionPane.showMessageDialog(IssuePage.this, "프로젝트 멤버 추가 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+            }
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "프로젝트 멤버 추가 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void fixIssue() {
+		String urlString = String.format("http://localhost:8080/issues/status/priority%s", issueId);
+		String jsonInputString = String.format("{\"issueStatus\":\"%s\", \"issuePriority\":\"%s\"}", "RESOLVED", priority);
+		try {
+			String response = RestClient_Patch.sendPatchRequest(urlString, jsonInputString);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+	        boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+	        String code = jsonResponse.getString("code");
+	        
+	        if (isSuccess && "ISSUE_3000".equals(code)) {
+	        	JSONObject resultObject = jsonResponse.getJSONObject("result");
+	            status = resultObject.getString("issueStatus");
+	            statusLabel.setText(status);
+	            
+	        }  else {
+	        	String message = jsonResponse.getString("message");
+	            JOptionPane.showMessageDialog(IssuePage.this, "1이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "2이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void setIssueFixer() {
+		try {
+			String urlString = String.format("http://localhost:8080/issues/fixer/%s?userId=%s", issueId, userId);
+  
+	        String response = RestClient.sendPostRequest(urlString);
+	        
+	        JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            
+            if (isSuccess && "ISSUE_3000".equals(code)) {
+            	JSONObject resultObject = jsonResponse.getJSONObject("result");
+                fixer = resultObject.getString("userName");
+                fixerLabel.setText(fixer);
+            } else {
+                // 실패 시 오류 메시지 표시
+                String message = jsonResponse.getString("message");
+                JOptionPane.showMessageDialog(IssuePage.this, "프로젝트 멤버 추가 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+            }
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "프로젝트 멤버 추가 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void changePriorityNStatus() {
+		String urlString = String.format("http://localhost:8080/issues/status/priority%s", issueId);
+		
+		this.priority = (String)priorityComboBox.getSelectedItem();
+		String jsonInputString = String.format("{\"issueStatus\":\"%s\", \"issuePriority\":\"%s\"}", status, priority);
+		try {
+			String response = RestClient_Patch.sendPatchRequest(urlString, jsonInputString);
+			
+			JSONObject jsonResponse = new JSONObject(response);
+	        boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+	        String code = jsonResponse.getString("code");
+	        
+	        if (isSuccess && "ISSUE_3000".equals(code)) {
+	            
+	        }  else {
+	        	String message = jsonResponse.getString("message");
+	            JOptionPane.showMessageDialog(IssuePage.this, "1이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	        }
+		}
+		catch (Exception e) {
+			JOptionPane.showMessageDialog(IssuePage.this, "2이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	private String getUserRoleByUserId(long userId) {
+        String url = String.format("http://localhost:8080/projects/projectList/%s", userId);
+
+        try {
+            String response = RestClient_Get.sendGetRequest(url);
+
+            JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            
+            if (isSuccess && "PROJECT_2000".equals(code)) {
+                JSONObject resultObject = jsonResponse.getJSONObject("result");
+                JSONArray projectArray = resultObject.getJSONArray("projects");
+                for (int i = 0; i < projectArray.length(); i++) {
+                    JSONObject project = projectArray.getJSONObject(i);
+                    if (project.getLong("projectId") == parentFrame.getProjectId()) {
+                        return project.getString("userRole");
+                    }
+                }
+                throw new RuntimeException("User ID not found");
+            } else {
+                throw new RuntimeException("Failed to get username: " + jsonResponse.getString("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error occurred while fetching username", e);
+        }
+    }
+	
+	private String getUserNameByUserId(long userId) {
+        String url = String.format("http://localhost:8080/users");
+
+        try {
+            String response = RestClient_Get.sendGetRequest(url);
+            System.out.println("Response from server: " + response);
+
+            JSONObject jsonResponse = new JSONObject(response);
+            boolean isSuccess = jsonResponse.getBoolean("isSuccess");
+            String code = jsonResponse.getString("code");
+            
+            if (isSuccess && "USER_1000".equals(code)) {
+                JSONObject resultObject = jsonResponse.getJSONObject("result");
+                JSONArray usersArray = resultObject.getJSONArray("users");
+                for (int i = 0; i < usersArray.length(); i++) {
+                    JSONObject user = usersArray.getJSONObject(i);
+                    if (user.getLong("userId") == userId) {
+                        return user.getString("userName");
+                    }
+                }
+                throw new RuntimeException("User ID not found");
+            } else {
+                throw new RuntimeException("Failed to get username: " + jsonResponse.getString("message"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error occurred while fetching username", e);
+        }
+    }
 }
 

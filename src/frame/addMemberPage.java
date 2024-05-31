@@ -63,6 +63,7 @@ class AddMemberPage extends JDialog {
         btnSubmit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
+            	
             	String userName = (String) cbUserName.getSelectedItem();
             	String userRole = (String) cbUserRole.getSelectedItem();
             	
@@ -72,7 +73,7 @@ class AddMemberPage extends JDialog {
             			 addMemberId = (long)Member.get(i)[0];
             		 }
             	}
-            	
+
                 parentFrame.addProjectMember(addMemberId, userRole);
                 setVisible(false);
                 dispose();
