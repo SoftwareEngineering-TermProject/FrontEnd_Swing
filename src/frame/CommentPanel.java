@@ -43,14 +43,16 @@ public class CommentPanel extends JPanel {
 	private int textAreaCount;
 	private GridBagConstraints gbc;
 	private JScrollPane scr;
+	private String url;
 
 	public CommentPanel(int width, int height, long userId, long issueId) {
 		
 		this.userId = userId;
 		this.issueId = issueId;
-		userName = getUserNameByUserId(userId);
 		textAreaCount = 0;
 		commentList = new ArrayList<>();
+		url = InputUrlPage.getUrl();
+		userName = getUserNameByUserId(userId);
 		
 		setSize(width, height);
         setLayout(new BorderLayout());
@@ -140,7 +142,7 @@ public class CommentPanel extends JPanel {
 		try {
 			String encodedUserId = URLEncoder.encode(Long.toString(userId), "UTF-8");
 			String jsonInputString = String.format("{\"issueId\":\"%s\", \"content\":\"%s\"}", issueId, text);
-			String result = RestClient.sendPostRequest("http://localhost:8080/comments/?userId=" + encodedUserId, jsonInputString);
+			String result = RestClient.sendPostRequest(url + "comments/?userId=" + encodedUserId, jsonInputString);
 			
 			JSONObject jsonResponse = new JSONObject(result);
 			boolean isSuccess = jsonResponse.getBoolean("isSuccess");
@@ -255,7 +257,7 @@ public class CommentPanel extends JPanel {
 	}
 	
 	private String getUserNameByUserId(long userId) {
-        String url = String.format("http://localhost:8080/users");
+        String url = this.url + "users";
 
         try {
             String response = RestClient_Get.sendGetRequest(url);

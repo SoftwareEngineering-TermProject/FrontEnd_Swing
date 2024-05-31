@@ -41,6 +41,7 @@ public class MainFrame extends JFrame {
 	private int numBtn;
 	private boolean modifyMode;
 	private boolean deleteMode;
+	private String url;
 	
 	private ArrayList<Long> accessibleId; // 이것도 임시.
 	
@@ -56,6 +57,7 @@ public class MainFrame extends JFrame {
 		numBtn = 0;
 		modifyMode = false;
 		deleteMode = false;
+		url = InputUrlPage.getUrl();
 		////////////////////////////
 		
 		accessibleId = new ArrayList<>();
@@ -247,7 +249,7 @@ public class MainFrame extends JFrame {
 	private void readProjectList() {
 		try {
 			String encodedUserId = URLEncoder.encode(userId + "", "UTF-8");
-			String urlString = "http://localhost:8080/projects/projectList/" + encodedUserId;
+			String urlString = url + "projects/projectList/" + encodedUserId;
 
 			String response = RestClient_Get.sendGetRequest(urlString);
 			
@@ -383,18 +385,7 @@ public class MainFrame extends JFrame {
 	}
 	
 	public void accessProject(long projectId, String title) {
-		//new ProjectFrame(title, this);
-		
-		//통신 요청으로 프로젝트 접속할때 userId 확인해서 접근 권한 있는지 체크. 일단은 임시로 느낌만 만듬.
-		/*
-		if(!accessibleId.contains(userId)) {
-			JOptionPane.showMessageDialog(MainFrame.this, "NOT accessible", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		else {
-			new ProjectFrame(projId, title, this);
-			setVisible(false);
-		}
-		*/
+
 		String userRole = null;
 		for(int i = 0; i < projectList.size(); i++) {
 			if ((long)projectList.get(i)[0] == projectId) {
@@ -415,7 +406,7 @@ public class MainFrame extends JFrame {
 
         // 응답 처리
         if (yesOrNo == JOptionPane.YES_OPTION) {
-        	String url = String.format("http://localhost:8080/projects/%d?userId=%d", projectId, userId);
+        	String url = String.format(this.url + "projects/%d?userId=%d", projectId, userId);
     		try {
     			String response = RestClient_Delete.sendDeleteRequest(url);
     			
@@ -436,10 +427,13 @@ public class MainFrame extends JFrame {
                     removeButton(index);
 
                 } else {
-                    JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(MainFrame.this, "프로젝트 삭제 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
                 }        
     		} catch (Exception e) {
-    			JOptionPane.showMessageDialog(MainFrame.this, "Project Deletion Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    			if(e.getMessage().startsWith("Failed : HTTP error code : 400")) {
+    				JOptionPane.showMessageDialog(MainFrame.this, "프로젝트 삭제 불가: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+    			}
+    			JOptionPane.showMessageDialog(MainFrame.this, "프로젝트 삭제 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     		}
         }
 	}

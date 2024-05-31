@@ -32,11 +32,15 @@ public class ProjectFrame extends JFrame{
 	private ArrayList<Long> issueList;
 	private long projectId;
 	private long userId;
+	private String url;
+	
 	public ProjectFrame(long projectId, long userId, String userRole, String title, MainFrame parentFrame) {
 		
 		issueList = new ArrayList<>();
 		this.projectId = projectId;
 		this.userId = userId;
+		url = InputUrlPage.getUrl();
+		
 		setTitle(title);
 		setSize(1150, 820);
 		setLocationRelativeTo(null); // 화면 중앙 위치
@@ -62,21 +66,9 @@ public class ProjectFrame extends JFrame{
 			}
 		});
 		
-		ProjStyleButton btn2 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "remove issue");
-		panel1.add(btn2);
-		btn2.setBounds(220, 100, 160, 50);
-		btn2.setPreferredSize(new Dimension(160, 50));
-		
-		btn2.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				//함수구현
-			}
-		});
-		
 		ProjStyleButton btn3 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "+ add member");
 		panel1.add(btn3);
-		btn3.setBounds(390, 100, 160, 50);
+		btn3.setBounds(220, 100, 160, 50);
 		btn3.setPreferredSize(new Dimension(160, 50));
 		
 		btn3.addMouseListener(new MouseAdapter() {
@@ -86,15 +78,15 @@ public class ProjectFrame extends JFrame{
 			}
 		});
 		
-		ProjStyleButton btn4 = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "remove member");
-		panel1.add(btn4);
-		btn4.setBounds(560, 100, 160, 50);
-		btn4.setPreferredSize(new Dimension(160, 50));
+		ProjStyleButton statisticsButton = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.clickedCustomDarkGray, Color.BLACK, "statistics");
+		panel1.add(statisticsButton);
+		statisticsButton.setBounds(390, 100, 160, 50);
+		statisticsButton.setPreferredSize(new Dimension(160, 50));
 		
-		btn4.addMouseListener(new MouseAdapter() {
+		statisticsButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				createRemoveMemberPage();
+				// 통계 구현
 			}
 		});
 		
@@ -113,7 +105,7 @@ public class ProjectFrame extends JFrame{
 
 			},
 		    new String [] {
-		    	"ID", "Issue title", "Reporter", "Fixer", "Assignee", "Priority", "Status", "Date"
+		    	"#", "Issue title", "Reporter", "Fixer", "Assignee", "Priority", "Status", "Date"
 		    }
 		) {
 		    /**
@@ -192,7 +184,7 @@ public class ProjectFrame extends JFrame{
 			String encodedUserName = URLEncoder.encode(Long.toString(addMemberId), "UTF-8");
 			String jsonInputString = String.format("{\"adminId\":\"%s\", \"projectId\":\"%s\", \"userRole\":\"%s\"}", userId, projectId, userRole);
 	    	
-	        String urlString = "http://localhost:8080/projects/add/" + encodedUserName;
+	        String urlString = url + "projects/add/" + encodedUserName;
 	        
 	        String response = RestClient.sendPostRequest(urlString, jsonInputString);
 	        
@@ -208,7 +200,12 @@ public class ProjectFrame extends JFrame{
                 JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 멤버 추가 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
             }
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 멤버 추가 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			if (e.getMessage().equals("Failed : HTTP error code : 400")) {
+				JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 멤버 추가 불가: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			else {
+				JOptionPane.showMessageDialog(ProjectFrame.this, "프로젝트 멤버 추가 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 
@@ -218,11 +215,11 @@ public class ProjectFrame extends JFrame{
 	        @Override
 	        protected String doInBackground() throws Exception {
 	        	if(keyword.equals("")) {
-		            String urlString = String.format("http://localhost:8080/issues/list/%d", projectId);
+		            String urlString = String.format(url + "issues/list/%d", projectId);
 		            return RestClient_Get.sendGetRequest(urlString);
 	        	}
 	        	else {
-	        		String urlString = String.format("http://localhost:8080/issues/list/%d?search=%s", projectId, keyword);
+	        		String urlString = String.format(url + "issues/list/%d?search=%s", projectId, keyword);
 		            return RestClient_Get.sendGetRequest(urlString);
 	        	}
 	        }
@@ -256,7 +253,7 @@ public class ProjectFrame extends JFrame{
 	                        
 	                		issueList.add(issueId);
 	                        
-	                        Object[] array = {i+1, title, reporter, fixer, assignee, priority, status, date};
+	                        Object[] array = {projectsArray.length() - i, title, reporter, fixer, assignee, priority, status, date};
 	                		model.addRow(array);
 
 	                    }
@@ -274,10 +271,6 @@ public class ProjectFrame extends JFrame{
 	
 	public void createAddMemberPage() {
 		new AddMemberPage(this);
-	}
-	
-	public void createRemoveMemberPage() {
-		//new RemoveMemberPage(this);
 	}
 	
 	public long getProjectId() {

@@ -24,8 +24,12 @@ class SignUpFrame extends JDialog {
 	private JTextField tfName;
     private JTextField tfUserName;
     private JPasswordField pfPassword;
+    private String url;
 
     public SignUpFrame() {
+    	
+    	url = InputUrlPage.getUrl();
+    	
         setTitle("Sign Up");
         setSize(400, 300);
         setModal(true);
@@ -93,7 +97,7 @@ class SignUpFrame extends JDialog {
         new SwingWorker<String, Void>() {
             @Override
             protected String doInBackground() throws Exception {
-                return RestClient.sendPostRequest("http://localhost:8080/users/sign_up", jsonInputString);
+                return RestClient.sendPostRequest(url + "users/sign_up", jsonInputString);
             }
             @Override
             protected void done() {
@@ -116,12 +120,14 @@ class SignUpFrame extends JDialog {
                     }
 
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
                     if (e.getMessage().equals("java.net.ConnectException: Connection refused: connect")) {
                     	JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: 서버와 연결이 되지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                     else if (e.getMessage().equals("java.lang.RuntimeException: Failed : HTTP error code : 409")) {
                         JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: 사용중인 아이디입니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    else if (e.getMessage().startsWith("java.net.MalformedURLException: no protocol")) {
+                    	JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: 주소 " + url + "을(를) 찾을 수 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                     else {
                     	JOptionPane.showMessageDialog(SignUpFrame.this, "회원가입 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

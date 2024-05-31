@@ -29,11 +29,13 @@ public class ModifyProjectDialog extends JDialog { // Modal 창 만들기 위해
 	private JTextField tf1;
 	private JTextArea ta1;
 	private long projectId;
+	private String url;
 	
 	public ModifyProjectDialog(long projectId, MainFrame parentFrame) {
 		
 		this.parentFrame = parentFrame;
 		this.projectId = projectId;
+		url = InputUrlPage.getUrl();
 		
 		setTitle("Modify Project");
 		setSize(560, 480);
@@ -139,7 +141,7 @@ public class ModifyProjectDialog extends JDialog { // Modal 창 만들기 위해
 		String encodedProjectId = URLEncoder.encode(projectId + "", "UTF-8");
 
         // URL에 파라미터 추가
-        String urlString = "http://localhost:8080/projects/" + encodedProjectId;
+        String urlString = url + "projects/" + encodedProjectId;
         
         try {
         	String response = RestClient_Get.sendGetRequest(urlString);
@@ -182,7 +184,7 @@ public class ModifyProjectDialog extends JDialog { // Modal 창 만들기 위해
                 String encodedUserId = URLEncoder.encode(userId + "", "UTF-8");
 
                 // URL에 파라미터 추가
-                String urlString = "http://localhost:8080/projects/" + encodedProjectId + "?userId=" + encodedUserId;
+                String urlString = url + "projects/" + encodedProjectId + "?userId=" + encodedUserId;
                 
                 return RestClient_Patch.sendPatchRequest(urlString, jsonInputString);
             }
@@ -211,8 +213,11 @@ public class ModifyProjectDialog extends JDialog { // Modal 창 만들기 위해
                     if(e.getMessage().equals("java.net.ConnectException: Connection refused: connect")) {
                     	JOptionPane.showMessageDialog(ModifyProjectDialog.this, "프로젝트 수정 실패: 서버와 연결이 되지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
+                    else if(e.getMessage().startsWith("java.lang.RuntimeException: Failed : HTTP error code : 400")) {
+                    	JOptionPane.showMessageDialog(ModifyProjectDialog.this, "프로젝트 수정 불가: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                     else {
-                    	JOptionPane.showMessageDialog(ModifyProjectDialog.this, "!!Modify Project Failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    	JOptionPane.showMessageDialog(ModifyProjectDialog.this, "프로젝트 수정 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }

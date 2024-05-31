@@ -49,6 +49,7 @@ public class IssuePage extends JDialog {
 	private ProjectFrame parentFrame;
 	private String userRole;
 	private boolean isClosed;
+	private String url;
 	
 	public IssuePage (long userId, long issueId, ProjectFrame parentFrame) {
 		
@@ -60,6 +61,7 @@ public class IssuePage extends JDialog {
 		edit = false;
 		assigneeMember = new ArrayList<>();
 		this.parentFrame = parentFrame;
+		url = InputUrlPage.getUrl();
 		userRole = getUserRoleByUserId(userId);
 		
 		setSize(1000,700);
@@ -69,10 +71,10 @@ public class IssuePage extends JDialog {
 		
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(null);
-		mainPanel.setBackground(Color.WHITE);
-		mainPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		mainPanel.setBackground(ProjColor.customDarkGray);
+		mainPanel.setBorder(null);
 		
-		ProjStyleButton closeButton = new ProjStyleButton(Color.WHITE, Color.WHITE, Color.BLACK, "X");
+		ProjStyleButton closeButton = new ProjStyleButton(ProjColor.customDarkGray, ProjColor.customDarkGray, Color.BLACK, "X");
 		closeButton.setFont(new Font(null, Font.PLAIN, 50));
 		closeButton.setBounds(550, 20, 30, 35);
 		closeButton.setPreferredSize(new Dimension(30, 35));
@@ -88,6 +90,7 @@ public class IssuePage extends JDialog {
 		mainPanel.add(closeButton);
 		
 		titleTextField = new JTextField();
+		titleTextField.setBackground(ProjColor.customDarkGray);
 		titleTextField.setEnabled(false);
 		titleTextField.setFont(new Font(null, Font.BOLD, 40));
 		titleTextField.setBorder(null);
@@ -105,6 +108,7 @@ public class IssuePage extends JDialog {
 		
 		descriptionTextArea = new JTextArea();
 		descriptionTextArea.setFont(new Font("맑은 고딕", 1, 15));
+		descriptionTextArea.setBackground(ProjColor.customGray);
 		descriptionTextArea.setText(description);
 		descriptionTextArea.setLineWrap(true);
 		descriptionTextArea.setWrapStyleWord(true);
@@ -123,7 +127,7 @@ public class IssuePage extends JDialog {
 		editButton.setFont(new Font("맑은 고딕", 1, 25));
 		editButton.setBounds(30, 80, 55, 40);
 		editButton.setPreferredSize(new Dimension(55, 40));
-		editButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+		editButton.setBorder(null);
 		
 		editButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -166,7 +170,7 @@ public class IssuePage extends JDialog {
 		
 		String[] none = {"None"};
 		assigneeComboBox = new ProjStyleComboBox(none);
-		assigneeComboBox.getEditor().getEditorComponent().setBackground(Color.red); //?
+		assigneeComboBox.setBackground(ProjColor.customGray);
 		assigneeComboBox.setBounds(150, 480, 100, 25);
 		assigneeComboBox.setPreferredSize(new Dimension(100, 25));
 		mainPanel.add(assigneeComboBox);
@@ -235,6 +239,7 @@ public class IssuePage extends JDialog {
 		
 		String[] priorityList = {"BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL"};
 		priorityComboBox = new ProjStyleComboBox(priorityList);
+		priorityComboBox.setBackground(ProjColor.customGray);
 		priorityComboBox.setBounds(150, 560, 100, 25);
 		priorityComboBox.setPreferredSize(new Dimension(100, 25));
 		mainPanel.add(priorityComboBox);
@@ -346,7 +351,7 @@ public class IssuePage extends JDialog {
 	}
 	
 	public void deleteAssignee () {
-		String url = String.format("http://localhost:8080/issues/issues/assignee/%s?userId=%s", issueId, userId);
+		String url = String.format(this.url + "issues/issues/assignee/%s?userId=%s", issueId, userId);
 		try {
 			String response = RestClient_Delete.sendDeleteRequest(url);
 			
@@ -366,7 +371,7 @@ public class IssuePage extends JDialog {
 	}
 	
 	public void deleteFixer () {
-		String url = String.format("http://localhost:8080/issues/issues/fixer/%s?userId=%s", issueId, userId);
+		String url = String.format(this.url + "issues/issues/fixer/%s?userId=%s", issueId, userId);
 		try {
 			String response = RestClient_Delete.sendDeleteRequest(url);
 			
@@ -386,7 +391,7 @@ public class IssuePage extends JDialog {
 	}
 	
 	public void modifyIssue(String modifiedTitle, String modifiedDescription) {
-		String urlString = String.format("http://localhost:8080/issues/%s?userId=%s", issueId, userId);
+		String urlString = String.format(url + "issues/%s?userId=%s", issueId, userId);
 		String jsonInputString = String.format("{\"title\":\"%s\", \"description\":\"%s\"}", modifiedTitle, modifiedDescription);
 		try {
 			String response = RestClient_Patch.sendPatchRequest(urlString, jsonInputString);
@@ -403,16 +408,21 @@ public class IssuePage extends JDialog {
 	            descriptionTextArea.setText(modifyingDescription);
 	        }  else {
 	        	String message = jsonResponse.getString("message");
-	            JOptionPane.showMessageDialog(IssuePage.this, "1이슈 목록 가져오기 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+	            JOptionPane.showMessageDialog(IssuePage.this, "이슈 수정 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
 	        }
 		}
 		catch (Exception e) {
-			JOptionPane.showMessageDialog(IssuePage.this, "2이슈 목록 가져오기 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			if (e.getMessage().equals("Failed : HTTP error code : 400")) {
+				JOptionPane.showMessageDialog(IssuePage.this, "이슈 수정 불가: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			else {
+				JOptionPane.showMessageDialog(IssuePage.this, "이슈 수정 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);	
+			}
 		}
 	}
 	
 	public void getIssueDetailFromServer() {
-		String urlString = String.format("http://localhost:8080/issues/%d", issueId);
+		String urlString = String.format(url + "issues/%d", issueId);
 		try {
 			String response = RestClient_Get.sendGetRequest(urlString);
 			JSONObject jsonResponse = new JSONObject(response);
@@ -463,7 +473,7 @@ public class IssuePage extends JDialog {
 	}
 	
 	public void getIssueComment() {
-		String urlString = String.format("http://localhost:8080/issues/%s", issueId);
+		String urlString = String.format(url + "issues/%s", issueId);
 		try {
 			String response = RestClient_Get.sendGetRequest(urlString);
 			JSONObject jsonResponse = new JSONObject(response);
@@ -509,7 +519,7 @@ public class IssuePage extends JDialog {
 	public void getAssigneeMember() {
 		
 		try {
-			String urlString = "http://localhost:8080/users";
+			String urlString = url + "users";
 			String response = RestClient_Get.sendGetRequest(urlString);
 			
 			JSONObject jsonResponse = new JSONObject(response);
@@ -556,12 +566,8 @@ public class IssuePage extends JDialog {
 	}
 	
 	public void assignMember(String assignedUserName) {
-		if(assignedUserName.equals("None")) {
-			JOptionPane.showMessageDialog(IssuePage.this, "할당 실패 : None은 할당할 수 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
 		try {
-			String urlString = String.format("http://localhost:8080/issues/assignee/%s?userId=%s", issueId, userId);
+			String urlString = String.format(url + "issues/assignee/%s?userId=%s", issueId, userId);
 			String jsonInputString = String.format("{\"userName\":\"%s\"}", assignedUserName);
   
 	        String response = RestClient.sendPostRequest(urlString, jsonInputString);
@@ -580,15 +586,23 @@ public class IssuePage extends JDialog {
             } else {
                 // 실패 시 오류 메시지 표시
                 String message = jsonResponse.getString("message");
-                JOptionPane.showMessageDialog(IssuePage.this, "프로젝트 멤버 추가 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(IssuePage.this, "이슈 담당자 할당 실패: " + message, "Error", JOptionPane.ERROR_MESSAGE);
             }
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(IssuePage.this, "프로젝트 멤버 추가 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			if (e.getMessage().equals("Failed : HTTP error code : 400")) {
+				JOptionPane.showMessageDialog(IssuePage.this, "이슈 담당자 할당 실패: Nonedms 할당할 수 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			else if (e.getMessage().equals("Failed : HTTP error code : 500")) {
+				JOptionPane.showMessageDialog(IssuePage.this, "이슈 담당자 할당 불가: 권한이 없습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			else {
+				JOptionPane.showMessageDialog(IssuePage.this, "이슈 담당자 할당 실패: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 	
 	public void fixIssue() {
-		String urlString = String.format("http://localhost:8080/issues/status/priority%s", issueId);
+		String urlString = String.format(url + "issues/status/priority%s", issueId);
 		String jsonInputString = String.format("{\"issueStatus\":\"%s\", \"issuePriority\":\"%s\"}", "RESOLVED", priority);
 		try {
 			String response = RestClient_Patch.sendPatchRequest(urlString, jsonInputString);
@@ -614,7 +628,7 @@ public class IssuePage extends JDialog {
 	
 	public void setIssueFixer() {
 		try {
-			String urlString = String.format("http://localhost:8080/issues/fixer/%s?userId=%s", issueId, userId);
+			String urlString = String.format(url + "issues/fixer/%s?userId=%s", issueId, userId);
   
 	        String response = RestClient.sendPostRequest(urlString);
 	        
@@ -637,7 +651,7 @@ public class IssuePage extends JDialog {
 	}
 	
 	public void changePriorityNStatus() {
-		String urlString = String.format("http://localhost:8080/issues/status/priority%s", issueId);
+		String urlString = String.format(url + "issues/status/priority%s", issueId);
 		
 		this.priority = (String)priorityComboBox.getSelectedItem();
 		String jsonInputString = String.format("{\"issueStatus\":\"%s\", \"issuePriority\":\"%s\"}", status, priority);
@@ -661,7 +675,7 @@ public class IssuePage extends JDialog {
 	}
 	
 	private String getUserRoleByUserId(long userId) {
-        String url = String.format("http://localhost:8080/projects/projectList/%s", userId);
+        String url = String.format(this.url + "projects/projectList/%s", userId);
 
         try {
             String response = RestClient_Get.sendGetRequest(url);
@@ -690,7 +704,7 @@ public class IssuePage extends JDialog {
     }
 	
 	private String getUserNameByUserId(long userId) {
-        String url = String.format("http://localhost:8080/users");
+        String url = String.format(this.url + "users");
 
         try {
             String response = RestClient_Get.sendGetRequest(url);
