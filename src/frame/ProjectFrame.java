@@ -33,6 +33,8 @@ public class ProjectFrame extends JFrame{
 	private long projectId;
 	private long userId;
 	private String url;
+	private int year = 2024;
+
 	
 	public ProjectFrame(long projectId, long userId, String userRole, String title, MainFrame parentFrame) {
 		
@@ -86,7 +88,7 @@ public class ProjectFrame extends JFrame{
 		statisticsButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// 통계 구현
+				new IssueStatisticsFrame(projectId, year);
 			}
 		});
 		
