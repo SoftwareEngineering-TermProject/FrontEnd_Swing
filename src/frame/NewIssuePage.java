@@ -10,16 +10,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import java.util.concurrent.ExecutionException;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import style.ProjColor;
 import style.ProjStyleButton;
 import style.ProjStyleComboBox;
 import util.RestClient;
-import util.RestClient_Get;
 
 public class NewIssuePage extends JDialog {
 	

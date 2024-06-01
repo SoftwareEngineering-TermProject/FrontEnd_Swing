@@ -6,6 +6,8 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/PC/Desktop/ws_front/SoftwareEngineeringGUI/libs/json-20210307.jar"/>
+	<classpathentry kind="lib" path="C:/Users/user/Desktop/final SW/FrontEnd_Swing/libs/json-20210307.jar"/>
+	<classpathentry kind="lib" path="C:/Users/user/Desktop/final SW/FrontEnd_Swing/libs/jfreechart-1.0.19.jar"/>
+	<classpathentry kind="lib" path="C:/Users/user/Desktop/final SW/FrontEnd_Swing/libs/jcommon-1.0.23.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

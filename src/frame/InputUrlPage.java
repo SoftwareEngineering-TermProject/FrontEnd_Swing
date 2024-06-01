@@ -7,12 +7,8 @@ import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Dimension;
-import org.json.JSONObject;
-
 import style.ProjColor;
 import style.ProjStyleButton;
-
-import util.RestClient;
 
 public class InputUrlPage extends JFrame{
 	
