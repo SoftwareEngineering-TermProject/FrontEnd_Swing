@@ -1,7 +1,23 @@
 # Issue Tracking System
 
+## 제출물 요약
+Server-spring			서버 실행파일
+Server-spring-sourcecode	서버 소스코드
+UI-swing				스윙 ui 실행파일
+UI-swing-sourcecode		스윙 ui 소스코드
+UI-web-sourcecode		웹 ui 소스코드
+README.txt
+발표 슬라이드.pptx
+비디오 클립.mp4
+테스트 케이스.pdf			프로젝트 문서에서 테스트 코드 항목을 따로 첨부함.
+프로젝트 문저.pdf 
+
+## Github
+https://github.com/SoftwareEngineering-TermProject
+
+
 ## Description
-이 프로젝트는 이슈를 관리하고 추적할 수 있는 Issue Tracking System입니다. 이 시스템은 이슈를 생성, 업데이트, 삭제하는 기능과 더불어 트렌드와 이슈 를 분석할 수 있는 통계 기능을 제공합니다.
+본 프로젝트는 이슈를 관리하고 추적할 수 있는 Issue Tracking System입니다. 이 시스템은 이슈를 생성, 업데이트, 삭제하는 기능과 더불어 트렌드와 이슈 를 분석할 수 있는 통계 기능을 제공합니다.
 
 
 ## Features
@@ -29,7 +45,7 @@ OpenJDK 64-Bit Server VM Temurin-17.0.6+10 (build 17.0.6+10, mixed mode, sharing
 
 4. FrontEnd-jar_최종.exe 파일 이동 
 
-5. SoftwareEngineering.exe 실행.
+5. SoftwareEngineering.exe 실행. / 웹 브라우저 localhost:8080 접속
 
 
 #### 사용법 (Usage)
